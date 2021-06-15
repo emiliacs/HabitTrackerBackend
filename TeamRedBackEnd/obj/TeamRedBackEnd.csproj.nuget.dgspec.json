@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\carzu\\source\\repos\\TeamRedBackEnd\\TeamRedBackEnd\\TeamRedBackEnd.csproj": {}
+    "C:\\Users\\carzu\\OneDrive\\Asiakirjat\\teamredbackend\\TeamRedBackEnd\\TeamRedBackEnd.csproj": {}
   },
   "projects": {
-    "C:\\Users\\carzu\\source\\repos\\TeamRedBackEnd\\TeamRedBackEnd\\TeamRedBackEnd.csproj": {
+    "C:\\Users\\carzu\\OneDrive\\Asiakirjat\\teamredbackend\\TeamRedBackEnd\\TeamRedBackEnd.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\carzu\\source\\repos\\TeamRedBackEnd\\TeamRedBackEnd\\TeamRedBackEnd.csproj",
+        "projectUniqueName": "C:\\Users\\carzu\\OneDrive\\Asiakirjat\\teamredbackend\\TeamRedBackEnd\\TeamRedBackEnd.csproj",
         "projectName": "TeamRedBackEnd",
-        "projectPath": "C:\\Users\\carzu\\source\\repos\\TeamRedBackEnd\\TeamRedBackEnd\\TeamRedBackEnd.csproj",
+        "projectPath": "C:\\Users\\carzu\\OneDrive\\Asiakirjat\\teamredbackend\\TeamRedBackEnd\\TeamRedBackEnd.csproj",
         "packagesPath": "C:\\Users\\carzu\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\carzu\\source\\repos\\TeamRedBackEnd\\TeamRedBackEnd\\obj\\",
+        "outputPath": "C:\\Users\\carzu\\OneDrive\\Asiakirjat\\teamredbackend\\TeamRedBackEnd\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
