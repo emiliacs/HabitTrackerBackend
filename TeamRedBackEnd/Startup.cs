@@ -5,6 +5,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -37,7 +40,30 @@ namespace TeamRedBackEnd
                                   });
             });
             services.AddDbContext<Database.DatabaseContext>(options => options.UseNpgsql(Configuration.GetSection("DatabaseLogin").GetSection("EasyLog").Value));
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey
+                        (
+                            Encoding.UTF8.GetBytes(Configuration.GetSection("JWTSettings").GetValue<string>("SecurityKey"))
+                        ),
+                        
+                    };
+                });
             services.AddScoped<Database.Repositroies.IUserRepository, Database.Repositroies.UserRepository>();
+
+            services.AddSingleton<Services.IAuthService>(new Services.AuthService(
+               Configuration.GetSection("JWTSettings").GetValue<string>("SecurityKey"),
+               Configuration.GetSection("JWTSettings").GetValue<int>("AverageLifespan")
+               ));
+
             services.AddControllers();
         }
 
@@ -51,7 +77,9 @@ namespace TeamRedBackEnd
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
+            
             app.UseCors(MyAllowSpecificOrigins);
 
             app.UseEndpoints(endpoints =>
