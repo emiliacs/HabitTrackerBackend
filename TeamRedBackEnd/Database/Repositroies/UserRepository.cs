@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TeamRedBackEnd.Database.Models;
+using TeamRedBackEnd.ViewModels;
 
 namespace TeamRedBackEnd.Database.Repositroies
 {
@@ -14,20 +15,32 @@ namespace TeamRedBackEnd.Database.Repositroies
             this.context = context;
         }
 
-        public void AddUser(User newUser)
+        public void AddUser(Usermodel usermodel)
         {
-            Console.WriteLine(newUser.Id + " is id of new user");
-            context.Users.Add(newUser);
+            User user = new User()
+            {
+                Name = usermodel.Name,
+                Email = usermodel.Email,
+                Password = usermodel.Password,
+                Id = usermodel.Id,
+                Picture = usermodel.Picture,
+                PublicProfile = usermodel.PublicProfile,
+                FriendIds = usermodel.FriendIds,
+                GroupIds = usermodel.GroupIds,
+                Salt = usermodel.Salt,
+                BytePassword = usermodel.BytePassword
+            };
+            context.Users.Add(user);
             context.SaveChanges();
         }
 
         public void AddUser(string name, string email, string password)
         {
-            User user = new User ()
+            User user = new User()
             {
-                Name = name, 
-                Email = email, 
-                Password = password 
+                Name = name,
+                Email = email,
+                Password = password
             };
             context.Users.Add(user);
             context.SaveChanges();
@@ -43,10 +56,11 @@ namespace TeamRedBackEnd.Database.Repositroies
         {
             return context.Users.Where(u => u.Id == id).FirstOrDefault();
         }
+       
 
         public User GetUser(string name)
         {
-            if (name.Contains("@")) 
+            if (name.Contains("@"))
             {
                 return context.Users.Where(u => u.Email == name).FirstOrDefault();
             }
@@ -58,7 +72,7 @@ namespace TeamRedBackEnd.Database.Repositroies
             List<User> userList = new List<User>();
             for (int i = 0; i < idArray.Length; i++)
             {
-                
+
                 userList.Add(GetUser(idArray[i]));
             }
             return userList;
@@ -76,19 +90,29 @@ namespace TeamRedBackEnd.Database.Repositroies
             context.SaveChanges();
         }
 
-        public void UpdateUser(int id, User userInfo)
+        public void EditUser(Usermodel usermodel)
         {
-            User user = GetUser(id);
-
-            user.Name = userInfo.Name;
-            user.Email = userInfo.Email;
-            user.Password = userInfo.Password;
-            user.Picture = userInfo.Picture;
-            user.PublicProfile = userInfo.PublicProfile;
-            user.FriendIds = userInfo.FriendIds;
-            user.GroupIds = userInfo.GroupIds;
-            context.Users.Update(user);
+            
+            var existingUser = GetUser(usermodel.Id);
+            existingUser.Name = usermodel.Name;
+            existingUser.Email = usermodel.Email;
+            existingUser.Password = usermodel.Password;
+            existingUser.Picture = usermodel.Picture;
+            existingUser.PublicProfile = usermodel.PublicProfile;
+            existingUser.FriendIds = usermodel.FriendIds;
+            existingUser.GroupIds = usermodel.GroupIds;
+            existingUser.Salt = usermodel.Salt;
+            existingUser.BytePassword = usermodel.BytePassword;
             context.SaveChanges();
+
+           
+
         }
+
+   
+
+
+
     }
 }
+

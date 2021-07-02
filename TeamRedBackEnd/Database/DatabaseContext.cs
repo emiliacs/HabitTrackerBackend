@@ -13,10 +13,10 @@ namespace TeamRedBackEnd.Database
         public DatabaseContext()
         { }
 
-        public DbSet<User> Users {get; set;}
-        public DbSet<Habit> Habits {get; set;}
-        public DbSet<Group> Groups {get; set;}
-        public DbSet<History> Histories {get; set;}
+        public DbSet<User> Users { get; set; }
+        public DbSet<Habit> Habits { get; set; }
+        public DbSet<Group> Groups { get; set; }
+        public DbSet<History> Histories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -67,7 +67,9 @@ namespace TeamRedBackEnd.Database
 
                 entity.HasOne(u => u.User).WithMany(h => h.Habits).HasForeignKey(o => o.OwnerId).HasConstraintName("FK_habit_owner_Id");
                 entity.HasOne(g => g.Group).WithOne(h => h.Habit).HasConstraintName("FK_habit_group_owner_Id");
-                
+
+                entity.HasOne(u => u.User).WithMany(h => h.Habits).HasForeignKey(o => o.OwnerId).HasConstraintName("FK_owner_Id");
+                entity.HasOne(g => g.Group).WithOne(h => h.Habit).HasConstraintName("FK_group_owner_Id");
             });
 
             modelBuilder.Entity<History>(entity =>

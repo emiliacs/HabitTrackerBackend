@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TeamRedBackEnd.Database.Models;
-
+using TeamRedBackEnd.ViewModels;
 
 namespace TeamRedBackEnd.Database.Repositroies
 {
@@ -16,14 +16,13 @@ namespace TeamRedBackEnd.Database.Repositroies
 
         public List<User> GetAllUsers();
 
-        public void AddUser(User newUser);
         public void AddUser(string name, string email, string password);
 
         public void RemoveUser(int id);
         public void RemoveUser(User user);
 
-        public void UpdateUser(int id, User userInfo);
-
-
+        public void EditUser(Usermodel usermodel);
+ 
+         void AddUser(Usermodel usermodel);
     }
 }

@@ -19,7 +19,7 @@ namespace TeamRedBackEnd.Database.Models
         public int TimesTodo { get; set; }
         public int DayRepeat { get; set; }
         public int TimeSpan { get; set; }
-        public enum HabitCategory {Workout, Health, Hobby, Sleep, Drink }
+        public enum HabitCategory { Workout, Health, Hobby, Sleep, Drink }
         public HabitCategory Category { get; set; }
         public bool Favorite { get; set; }
         public bool PublicHabit { get; set; }
