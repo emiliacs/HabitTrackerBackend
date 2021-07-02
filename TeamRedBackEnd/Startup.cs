@@ -58,6 +58,7 @@ namespace TeamRedBackEnd
                     };
                 });
             services.AddScoped<Database.Repositroies.IUserRepository, Database.Repositroies.UserRepository>();
+            services.AddScoped<Services.PasswordService>();
 
             services.AddSingleton<Services.IAuthService>(new Services.AuthService(
                Configuration.GetSection("JWTSettings").GetValue<string>("SecurityKey"),
@@ -67,14 +68,14 @@ namespace TeamRedBackEnd
             services.AddControllers();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.z
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            
             app.UseRouting();
 
             app.UseAuthentication();

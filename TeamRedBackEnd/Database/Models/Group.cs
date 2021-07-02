@@ -10,7 +10,7 @@ namespace TeamRedBackEnd.Database.Models
     {
         public int Id { get; set; }
         public int HabitID { get; set; }
-       
+
         public int[] UserIds { get; set; } // change to int array with user ids
 
         [ForeignKey("HabitID")]
