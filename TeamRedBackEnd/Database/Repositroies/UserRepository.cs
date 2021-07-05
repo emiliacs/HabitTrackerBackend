@@ -22,13 +22,13 @@ namespace TeamRedBackEnd.Database.Repositroies
                 Name = usermodel.Name,
                 Email = usermodel.Email,
                 Password = usermodel.Password,
-                Id = usermodel.Id,
                 Picture = usermodel.Picture,
                 PublicProfile = usermodel.PublicProfile,
                 FriendIds = usermodel.FriendIds,
                 GroupIds = usermodel.GroupIds,
                 Salt = usermodel.Salt,
-                BytePassword = usermodel.BytePassword
+                BytePassword = usermodel.BytePassword,
+                VerificationCode = usermodel.VerificationCode
             };
             context.Users.Add(user);
             context.SaveChanges();
@@ -109,10 +109,31 @@ namespace TeamRedBackEnd.Database.Repositroies
 
         }
 
-   
+        public void EditUser(User newUser)
+        {
+
+            var existingUser = GetUser(newUser.Id);
+            existingUser.Name = newUser.Name;
+            existingUser.Email = newUser.Email;
+            existingUser.Password = newUser.Password;
+            existingUser.Picture = newUser.Picture;
+            existingUser.PublicProfile = newUser.PublicProfile;
+            existingUser.FriendIds = newUser.FriendIds;
+            existingUser.GroupIds = newUser.GroupIds;
+            existingUser.Salt = newUser.Salt;
+            existingUser.BytePassword = newUser.BytePassword;
+            existingUser.VerificationCode = newUser.VerificationCode;
+            existingUser.Verified = newUser.Verified;
+            context.SaveChanges();
 
 
 
+        }
+
+        public User GetUserByVerificationCode(string verificationCode)
+        {
+            return context.Users.Where(u => u.VerificationCode == verificationCode).FirstOrDefault();
+        }
     }
 }
 

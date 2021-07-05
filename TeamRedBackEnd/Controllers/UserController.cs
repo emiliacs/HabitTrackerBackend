@@ -19,11 +19,13 @@ namespace TeamRedBackEnd.Controllers
     {
         private IUserRepository _userRepo;
         Services.PasswordService _passwordService;
-        
-        public UserController(IUserRepository userRepo, Services.PasswordService passwordService)
+        Services.IMailService _mailService;
+
+        public UserController(IUserRepository userRepo, Services.PasswordService passwordService, Services.IMailService mailService)
         {
             _userRepo = userRepo;
             _passwordService = passwordService;
+            _mailService = mailService;
         }
 
 
@@ -81,7 +83,6 @@ namespace TeamRedBackEnd.Controllers
         public IActionResult AddNewUser([FromBody] Usermodel usermodel)
         {
 
-  
             _passwordService.CreateSalt(usermodel);
 
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -99,12 +100,29 @@ namespace TeamRedBackEnd.Controllers
                 return BadRequest(ModelState);
             }
 
+            usermodel.VerificationCode = Nanoid.Nanoid.Generate();
+
             _passwordService.HashPassword(usermodel);
 
             _userRepo.AddUser(usermodel);
 
-            return Ok("User " + usermodel.Name + " has been created\n");
+            MailRequest mail = _mailService.MakeVerificationMail(usermodel);
+            _mailService.SendMailAsync(mail);
 
+            return Ok("User " + usermodel.Name + " has been created\n");
+        }
+
+
+        [HttpGet]
+        [Route("{VerificationLinkCode}")]
+        public IActionResult VerifyUser(string VerificationLinkCode)
+        {
+            User user = _userRepo.GetUserByVerificationCode(VerificationLinkCode);
+            if (user == null) return BadRequest("Invalid verification link");
+            user.Verified = true;
+            _userRepo.EditUser(user);
+            
+            return Ok(user);
         }
 
 
@@ -147,8 +165,6 @@ namespace TeamRedBackEnd.Controllers
         }
 
 
-
-
         [HttpDelete]
         [Route("delete/{id:int}")]
         public IActionResult DeleteUser(int id)
@@ -189,34 +205,6 @@ namespace TeamRedBackEnd.Controllers
                 }
             }
         }
-
-        [HttpPost]
-        [Route("login")]
-        public IActionResult CheckPassword( [FromBody] PasswordcheckModel passwordcheckModel)
-        {
-            if (!ModelState.IsValid)
-            {
-                return NotFound("Input can't be null");
-            }
-
-            else
-            {
-                var user = _userRepo.GetUser(passwordcheckModel.Name);
-
-
-                if (user == null)
-                {
-                    return BadRequest("Invalid profile name");
-                }
-
-
-                var verifyPassword = _passwordService.VerifyHash(passwordcheckModel.Password, user);
-
-                return Ok(verifyPassword ? "Success!" : "Wrong username or password!");
-            }
-
-        }
-
 
     }
 }

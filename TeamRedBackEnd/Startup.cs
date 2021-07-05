@@ -65,6 +65,9 @@ namespace TeamRedBackEnd
                Configuration.GetSection("JWTSettings").GetValue<int>("AverageLifespan")
                ));
 
+            services.Configure<ViewModels.MailSettings>(Configuration.GetSection("MailSettings"));
+            services.AddScoped<Services.IMailService, Services.MailService>();
+
             services.AddControllers();
         }
 
