@@ -11,6 +11,7 @@ namespace TeamRedBackEnd.Database.Repositroies
     {
         public User GetUser(int id);
         public User GetUser(string name);
+        public User GetUserByVerificationCode(string verificationCode);
 
         public List<User> GetUsersWithIdArray(int[] idArray);
 
@@ -22,6 +23,7 @@ namespace TeamRedBackEnd.Database.Repositroies
         public void RemoveUser(User user);
 
         public void EditUser(Usermodel usermodel);
+        public void EditUser(User newUser);
  
          void AddUser(Usermodel usermodel);
     }

@@ -27,10 +27,10 @@ namespace TeamRedBackEnd.ViewModels
         public int[] GroupIds { get; set; }
         public byte[] Salt { get; set; }
         public byte[] BytePassword { get; set; }
+        public string VerificationCode { get; set; }
+        public bool Verified { get; set; }
 
-
-
-        public ICollection<Group> Groups { get; set; }
+        public ICollection<Database.Models.Group> Groups { get; set; }
         public ICollection<Habit> Habits { get; set; }
 
     }

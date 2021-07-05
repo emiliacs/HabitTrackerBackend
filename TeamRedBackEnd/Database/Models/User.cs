@@ -17,6 +17,8 @@ namespace TeamRedBackEnd.Database.Models
         public int[] GroupIds { get; set; }
         public byte[] Salt { get; set; }
         public byte[] BytePassword { get; set; }
+        public string VerificationCode { get; set; }
+        public bool Verified { get; set; }
 
 
 

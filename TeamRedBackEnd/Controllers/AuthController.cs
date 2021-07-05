@@ -4,47 +4,53 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TeamRedBackEnd.ViewModels;
+using TeamRedBackEnd.Services;
 
 namespace TeamRedBackEnd.Controllers
 {
     [ApiController]
     [Route("api")]
-    
+
     public class AuthController : ControllerBase
     {
-        Services.IAuthService AuthService;
+        IAuthService AuthService;
+        IMailService MailService;
+        PasswordService PasswordService;
+
         Database.Repositroies.IUserRepository UserRepository;
-        public AuthController(Services.IAuthService AuthService, Database.Repositroies.IUserRepository UserRepository)
+
+        public AuthController(IAuthService AuthService, Database.Repositroies.IUserRepository UserRepository, MailService MailService, PasswordService PasswordService)
         {
             this.AuthService = AuthService;
+            this.MailService = MailService;
+            this.PasswordService = PasswordService;
             this.UserRepository = UserRepository;
         }
 
-        [HttpPost("login")]
+        [HttpPut("login")]
         public ActionResult<AuthData> Post([FromBody] LoginViewModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             Database.Models.User user = UserRepository.GetUser(model.Email);
-            bool passwordValid = AuthService.VerifyPassword(model.Password, user.Password);
+            bool passwordValid = PasswordService.VerifyHash(model.Password, user);
 
-            if (!passwordValid || user == null) 
+            if (!passwordValid || user == null)
             {
                 return BadRequest(new { msg = "Incorrect email or password" });
             }
-            return AuthService.GetAuthData(user.Id.ToString());
+            return Ok(AuthService.GetAuthData(user.Id.ToString()));
+            
         }
 
-        
         [HttpPost("logout")]
-        public ActionResult<AuthData> LogoutPost([FromBody] LoginViewModel model) 
+        public ActionResult<AuthData> LogoutPost([FromBody] LoginViewModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             Database.Models.User user = UserRepository.GetUser(model.Email);
             return AuthService.GetAuthData(user.Id.ToString(), 10);
         }
 
-      
-       
+
     }
 }

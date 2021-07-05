@@ -50,5 +50,6 @@ namespace TeamRedBackEnd.Services
 
             return user.BytePassword.SequenceEqual(newhash);
         }
+
     }
 }

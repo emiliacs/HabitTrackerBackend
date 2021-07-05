@@ -29,6 +29,8 @@ namespace TeamRedBackEnd.Database
                 entity.Property(e => e.Password).HasColumnName("user_password");
                 entity.Property(e => e.Picture).HasColumnName("user_picture");
                 entity.Property(e => e.PublicProfile).HasColumnName("user_public_profile");
+                entity.Property(e => e.VerificationCode).HasColumnName("user_verification_code");
+                entity.Property(e => e.Verified).HasColumnName("user_verified").HasDefaultValue(false);
                 entity.Property(e => e.FriendIds).HasColumnName("user_friends");
                 entity.Property(e => e.GroupIds).HasColumnName("user_groups");
 
