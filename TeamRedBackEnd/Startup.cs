@@ -37,6 +37,7 @@ namespace TeamRedBackEnd
                                   builder =>
                                   {
                                       builder.WithOrigins("http://localhost:19006");
+                                      builder.AllowAnyHeader();
                                   });
             });
             services.AddDbContext<Database.DatabaseContext>(options => options.UseNpgsql(Configuration.GetSection("DatabaseLogin").GetSection("EasyLog").Value));
