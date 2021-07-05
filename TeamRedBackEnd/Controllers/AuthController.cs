@@ -19,7 +19,7 @@ namespace TeamRedBackEnd.Controllers
 
         Database.Repositroies.IUserRepository UserRepository;
 
-        public AuthController(IAuthService AuthService, Database.Repositroies.IUserRepository UserRepository, MailService MailService, PasswordService PasswordService)
+        public AuthController(IAuthService AuthService, Database.Repositroies.IUserRepository UserRepository, IMailService MailService, PasswordService PasswordService)
         {
             this.AuthService = AuthService;
             this.MailService = MailService;
@@ -27,7 +27,7 @@ namespace TeamRedBackEnd.Controllers
             this.UserRepository = UserRepository;
         }
 
-        [HttpPut("login")]
+        [HttpPost("login")]
         public ActionResult<AuthData> Post([FromBody] LoginViewModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
