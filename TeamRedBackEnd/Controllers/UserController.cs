@@ -8,7 +8,7 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using TeamRedBackEnd.Database.Models;
-using TeamRedBackEnd.Database.Repositroies;
+using TeamRedBackEnd.Database.Repositories;
 using TeamRedBackEnd.ViewModels;
 
 namespace TeamRedBackEnd.Controllers

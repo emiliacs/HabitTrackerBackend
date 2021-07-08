@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TeamRedBackEnd.Database.Models
 {
-    public class Habit
+    public class Habit : IModelBase
     {
         public int Id { get; set; }
         public int HabitId { get; set; }
