@@ -181,15 +181,13 @@ namespace TeamRedBackEnd.Controllers
             }
             var userToDelete = _userRepo.GetUser(userName);
 
-            switch (userToDelete)
+            if (userToDelete == null)
             {
-                case null:
-                    return NotFound("No user found with this name: " + userName);
-
-                default:
-                    _userRepo.RemoveUser(userToDelete);
-                    return Ok("User has been deleted");
+                return NotFound("No user found with this name: " + userName);
             }
+
+            return Ok("User has been deleted");
+
         }
 
     }
