@@ -40,7 +40,7 @@ namespace TeamRedBackEnd
                                       builder.AllowAnyHeader();
                                   });
             });
-            services.AddDbContext<Database.DatabaseContext>(options => options.UseNpgsql(Configuration.GetSection("DatabaseLogin").GetSection("EasyLog").Value));
+            services.AddDbContext<Database.DatabaseContext>(options => options.UseNpgsql("Server=PostgreSQL 13;Host=localhost;Port=5432;Username=postgres;Password=root;Database=redbackend"));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -59,7 +59,7 @@ namespace TeamRedBackEnd
                     };
                 });
             services.AddScoped<Database.Repositories.IRepositoryWrapper, Database.Repositories.RepositoryWrapper>();
-            services.AddScoped<Database.Repositories.IUserRepository, Database.Repositories.UserRepository>();
+            services.AddScoped<Database.Repositories.IUsersRepository, Database.Repositories.UsersRepository>();
             services.AddScoped<Services.PasswordService>();
 
             services.AddSingleton<Services.IAuthService>(new Services.AuthService(
