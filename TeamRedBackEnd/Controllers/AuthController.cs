@@ -17,9 +17,9 @@ namespace TeamRedBackEnd.Controllers
         IMailService MailService;
         PasswordService PasswordService;
 
-        Database.Repositroies.IUserRepository UserRepository;
+        Database.Repositories.IUserRepository UserRepository;
 
-        public AuthController(IAuthService AuthService, Database.Repositroies.IUserRepository UserRepository, IMailService MailService, PasswordService PasswordService)
+        public AuthController(IAuthService AuthService, Database.Repositories.IUserRepository UserRepository, IMailService MailService, PasswordService PasswordService)
         {
             this.AuthService = AuthService;
             this.MailService = MailService;

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using TeamRedBackEnd.Database.Models;
 using TeamRedBackEnd.ViewModels;
 
-namespace TeamRedBackEnd.Database.Repositroies
+namespace TeamRedBackEnd.Database.Repositories
 {
     public interface IUserRepository
     {

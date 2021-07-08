@@ -4,10 +4,6 @@
 		<TargetFramework>netcoreapp3.1</TargetFramework>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<Folder Include="Database\Repositories\" />
-	</ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Konscious.Security.Cryptography.Argon2" Version="1.2.1" />
     <PackageReference Include="MailKit" Version="2.13.0" />

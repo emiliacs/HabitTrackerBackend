@@ -58,7 +58,8 @@ namespace TeamRedBackEnd
                         
                     };
                 });
-            services.AddScoped<Database.Repositroies.IUserRepository, Database.Repositroies.UserRepository>();
+            services.AddScoped<Database.Repositories.IRepositoryWrapper, Database.Repositories.RepositoryWrapper>();
+            services.AddScoped<Database.Repositories.IUserRepository, Database.Repositories.UserRepository>();
             services.AddScoped<Services.PasswordService>();
 
             services.AddSingleton<Services.IAuthService>(new Services.AuthService(
