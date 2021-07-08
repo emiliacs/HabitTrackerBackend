@@ -3,14 +3,14 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 using TeamRedBackEnd.Database.Models;
-using TeamRedBackEnd.Database.Repositroies;
+using TeamRedBackEnd.Database.Repositories;
 using TeamRedBackEnd.ViewModels;
 
 namespace TeamRedBackEnd.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
 
     public class UsersController : ControllerBase
     {
@@ -53,7 +53,7 @@ namespace TeamRedBackEnd.Controllers
 
 
         [HttpGet]
-        [Route("name/{userName}")]
+        [Route("{userName}")]
         [AllowAnonymous]
         public IActionResult GetUserByNameOrEmail(string userName)
         {
@@ -107,7 +107,7 @@ namespace TeamRedBackEnd.Controllers
         }
 
 
-        [HttpGet]
+        [HttpPatch]
         [Route("{VerificationLinkCode}")]
         public IActionResult VerifyUser(string VerificationLinkCode)
         {
