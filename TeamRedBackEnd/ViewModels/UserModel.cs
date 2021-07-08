@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using TeamRedBackEnd.Database.Models;
 
 namespace TeamRedBackEnd.ViewModels
@@ -17,9 +13,12 @@ namespace TeamRedBackEnd.ViewModels
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Password can't be empty")]
+        [MinLength(10, ErrorMessage = "Password needs to be at least 10 characters long")]
         public string Password { get; set; }
 
         [Required(ErrorMessage = "Name can't be empty")]
+        [StringLength(50, ErrorMessage = "Name cannot be longer than 50 characters. "), MinLength(3, ErrorMessage = "Username can't be shorter than 3 characters")]
+        [RegularExpression(@"^[0-9a-zA-Z-_]{1,50}$", ErrorMessage =  "Username can only contain letters, numbers or -_")]
         public string Name { get; set; }
         public string Picture { get; set; }
         public bool PublicProfile { get; set; }
@@ -30,6 +29,7 @@ namespace TeamRedBackEnd.ViewModels
         public string VerificationCode { get; set; }
         public bool Verified { get; set; }
 
+        public string Token { get; set; }
         public ICollection<Database.Models.Group> Groups { get; set; }
         public ICollection<Habit> Habits { get; set; }
 
