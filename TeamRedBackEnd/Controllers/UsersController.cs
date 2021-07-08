@@ -14,13 +14,13 @@ namespace TeamRedBackEnd.Controllers
 
     public class UsersController : ControllerBase
     {
-        private IUserRepository _userRepo;
+        private IUsersRepository _userRepo;
         Services.PasswordService _passwordService;
         Services.IMailService _mailService;
 
 
 
-        public UsersController(IUserRepository userRepo, Services.PasswordService passwordService, Services.IMailService mailService)
+        public UsersController(IUsersRepository userRepo, Services.PasswordService passwordService, Services.IMailService mailService)
         {
             _userRepo = userRepo;
             _passwordService = passwordService;

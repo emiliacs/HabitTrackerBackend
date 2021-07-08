@@ -7,7 +7,7 @@ using TeamRedBackEnd.ViewModels;
 
 namespace TeamRedBackEnd.Database.Repositroies
 {
-    public interface IUserRepository
+    public interface IUsersRepository
     {
         public User GetUser(int id);
         public User GetUser(string name);
