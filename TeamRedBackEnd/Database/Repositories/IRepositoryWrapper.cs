@@ -8,7 +8,7 @@ namespace TeamRedBackEnd.Database.Repositories
     public interface IRepositoryWrapper
     {
         
-        IUserRepository UserRepository { get; }
+        IUsersRepository UsersRepository { get; }
         IHabitRepository HabitRepository { get; }
         
         void Save();

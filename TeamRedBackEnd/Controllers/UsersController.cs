@@ -1,12 +1,7 @@
-﻿using Konscious.Security.Cryptography;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Npgsql;
 using System;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Security.Cryptography;
-using System.Text;
+using System.Threading.Tasks;
 using TeamRedBackEnd.Database.Models;
 using TeamRedBackEnd.Database.Repositories;
 using TeamRedBackEnd.ViewModels;
@@ -15,17 +10,22 @@ namespace TeamRedBackEnd.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    [Authorize]
+
+    public class UsersController : ControllerBase
     {
-        private IUserRepository _userRepo;
+        private IUsersRepository _userRepo;
         Services.PasswordService _passwordService;
         Services.IMailService _mailService;
 
-        public UserController(IUserRepository userRepo, Services.PasswordService passwordService, Services.IMailService mailService)
+
+
+        public UsersController(IUsersRepository userRepo, Services.PasswordService passwordService, Services.IMailService mailService)
         {
             _userRepo = userRepo;
             _passwordService = passwordService;
             _mailService = mailService;
+
         }
 
 
@@ -37,49 +37,42 @@ namespace TeamRedBackEnd.Controllers
 
 
         [HttpGet]
-        [Route("get/{id:int}")]
-        public IActionResult GetUserById(int id)
-        {
-            var user = _userRepo.GetUser(id);
-            if (user == null)
-            {
-                var response = new HttpResponseMessage(HttpStatusCode.NotFound)
-                {
-                    ReasonPhrase = "User with ID: " + id + " doesn't exist"
-                };
+        [Route("{userId:int}")]
 
-                return NotFound(response.ReasonPhrase);
-            }
+        public IActionResult GetUserById(int userId)
+        {
+
+            var user = _userRepo.GetUser(userId);
+
+            if (user == null) return NotFound("User with ID: " + userId + " doesn't exist");
+
             return Ok(user);
+
         }
 
 
+
         [HttpGet]
-        [Route("get/{name}")]
-        public IActionResult GetUserByNameOrEmail(string name)
+        [Route("{userName}")]
+        [AllowAnonymous]
+        public IActionResult GetUserByNameOrEmail(string userName)
         {
-            if (String.IsNullOrEmpty(name))
+            if (String.IsNullOrEmpty(userName))
             {
                 return NotFound("Input can't be null");
             }
+            var user = _userRepo.GetUser(userName);
 
-            else
+            return user switch
             {
-                try
-                {
-                    var user = _userRepo.GetUser(name);
-                    return Ok(user);
-                }
-                catch
-                {
-                    return NotFound("No user found with this name: " + name);
-                }
-            }
+                null => NotFound("No user found with this name: " + userName),
+                _ => Ok(user),
+            };
         }
 
 
         [HttpPost]
-        [Route("create")]
+        [AllowAnonymous]
         public IActionResult AddNewUser([FromBody] Usermodel usermodel)
         {
 
@@ -94,7 +87,7 @@ namespace TeamRedBackEnd.Controllers
                 return BadRequest(ModelState);
             }
 
-            else if (_userRepo.GetUser(usermodel.Email) != null)
+            if (_userRepo.GetUser(usermodel.Email) != null)
             {
                 ModelState.AddModelError("email", "Email address already in use");
                 return BadRequest(ModelState);
@@ -109,13 +102,14 @@ namespace TeamRedBackEnd.Controllers
             MailRequest mail = _mailService.MakeVerificationMail(usermodel);
             _mailService.SendMailAsync(mail);
 
+
             return Ok("User " + usermodel.Name + " has been created\n");
         }
 
 
         [HttpPatch]
         [Route("{VerificationLinkCode}")]
-        public IActionResult VerifyUser([FromBody]string VerificationCode)
+        public IActionResult VerifyUser([FromBody] string VerificationCode)
         {
             User user = _userRepo.GetUserByVerificationCode(VerificationCode);
             if (user == null) return BadRequest("Invalid verification link");
@@ -126,16 +120,12 @@ namespace TeamRedBackEnd.Controllers
 
 
         [HttpPatch]
-        [Route("edit/{id:int}")]
-        public ActionResult<Usermodel> EditUserProfile(int id, [FromBody] Usermodel usermodel)
+        [Route("{userId:int}")]
+        public ActionResult<Usermodel> EditUserProfile(int userId, [FromBody] Usermodel usermodel)
         {
-            var existingUserProfile = _userRepo.GetUser(id);
-
+            var existingUserProfile = _userRepo.GetUser(userId);
             var checkIfNameExists = _userRepo.GetUser(usermodel.Name);
-
             var checkIfEmailExists = _userRepo.GetUser(usermodel.Email);
-
-
             _passwordService.CreateSalt(usermodel);
 
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -155,54 +145,49 @@ namespace TeamRedBackEnd.Controllers
 
             usermodel.Id = existingUserProfile.Id;
 
-            
             _passwordService.HashPassword(usermodel);
             _userRepo.EditUser(usermodel);
 
-
-            return Ok("User has been edited");
+            return Ok(usermodel);
         }
 
 
         [HttpDelete]
-        [Route("delete/{id:int}")]
-        public IActionResult DeleteUser(int id)
+        [Route("{userId:int}")]
+        public IActionResult DeleteUser(int userId)
         {
-            try
+            var userToDelete = _userRepo.GetUser(userId);
+            ObjectResult objectresult = NotFound("User with ID: " + userId + " doesn't exist");
+
+            if (userToDelete != null)
             {
-                var userToDelete = _userRepo.GetUser(id);
+                objectresult = Ok("User has been deleted");
                 _userRepo.RemoveUser(userToDelete);
-                return Ok("User has been deleted");
+
             }
-            catch
-            {
-                return NotFound("User with ID: " + id + " doesn't exist");
-            }
+
+            return objectresult;
+
         }
 
 
         [HttpDelete]
-        [Route("delete/{name}")]
-        public IActionResult DeleteUser(string name)
+        [Route("{userName}")]
+        public IActionResult DeleteUser(string userName)
         {
-            if (String.IsNullOrWhiteSpace(name))
+            if (String.IsNullOrWhiteSpace(userName))
             {
                 return NotFound("Input can't be null");
             }
+            var userToDelete = _userRepo.GetUser(userName);
 
-            else
+            if (userToDelete == null)
             {
-                try
-                {
-                    var userToDelete = _userRepo.GetUser(name);
-                    _userRepo.RemoveUser(userToDelete);
-                    return Ok("User has been deleted");
-                }
-                catch
-                {
-                    return NotFound("No user found with this name: " + name);
-                }
+                return NotFound("No user found with this name: " + userName);
             }
+
+            return Ok("User has been deleted");
+
         }
 
     }

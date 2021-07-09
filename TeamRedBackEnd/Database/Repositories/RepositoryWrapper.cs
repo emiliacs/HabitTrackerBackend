@@ -9,7 +9,7 @@ namespace TeamRedBackEnd.Database.Repositories
     {
         private DatabaseContext _databaseContext;
         
-        private IUserRepository _userRepository;
+        private IUsersRepository _userRepository;
         private IHabitRepository _habitRepository;
 
         public RepositoryWrapper(DatabaseContext databaseContext)
@@ -18,13 +18,13 @@ namespace TeamRedBackEnd.Database.Repositories
         }
         
 
-        public IUserRepository UserRepository
+        public IUsersRepository UsersRepository
         {
             get
             {
                 if (_userRepository == null)
                 {
-                    _userRepository = new UserRepository(_databaseContext);
+                    _userRepository = new UsersRepository(_databaseContext);
                 }
                 return _userRepository;
             }

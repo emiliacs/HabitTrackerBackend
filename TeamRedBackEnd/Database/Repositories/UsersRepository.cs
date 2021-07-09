@@ -7,10 +7,10 @@ using TeamRedBackEnd.ViewModels;
 
 namespace TeamRedBackEnd.Database.Repositories
 {
-    public class UserRepository : IUserRepository
+    public class UsersRepository : IUsersRepository
     {
         private readonly DatabaseContext context;
-        public UserRepository(DatabaseContext context)
+        public UsersRepository(DatabaseContext context)
         {
             this.context = context;
         }
