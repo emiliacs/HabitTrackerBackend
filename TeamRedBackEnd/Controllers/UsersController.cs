@@ -109,9 +109,9 @@ namespace TeamRedBackEnd.Controllers
 
         [HttpPatch]
         [Route("{VerificationLinkCode}")]
-        public IActionResult VerifyUser([FromBody] string VerificationLinkCode)
+        public IActionResult VerifyUser([FromBody] string VerificationCode)
         {
-            User user = _userRepo.GetUserByVerificationCode(VerificationLinkCode);
+            User user = _userRepo.GetUserByVerificationCode(VerificationCode);
             if (user == null) return BadRequest("Invalid verification link");
             user.Verified = true;
             _userRepo.EditUser(user);

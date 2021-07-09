@@ -40,7 +40,7 @@ namespace TeamRedBackEnd
                                       builder.AllowAnyHeader();
                                   });
             });
-            services.AddDbContext<Database.DatabaseContext>(options => options.UseNpgsql("Server=PostgreSQL 13;Host=localhost;Port=5432;Username=postgres;Password=root;Database=redbackend"));
+            services.AddDbContext<Database.DatabaseContext>(options => options.UseNpgsql(Configuration.GetSection("DatabaseLogin").GetSection("EasyLog").Value));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
