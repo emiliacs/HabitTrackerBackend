@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using TeamRedBackEnd.Database.Models;
 using TeamRedBackEnd.Database.Repositories;
@@ -70,6 +71,31 @@ namespace TeamRedBackEnd.Controllers
             };
         }
 
+        [HttpGet]
+        [Route("me")]
+        public IActionResult GetUserWithJWT()
+        {
+            ClaimsPrincipal principal = HttpContext.User;
+            
+            if (principal.Identity.Name == null) { return BadRequest(); }
+
+            if (Int32.TryParse(principal.Identity.Name, out int id))
+            {
+                var user = _userRepo.GetUser(id);
+                if (user != null)
+                {
+                    return Ok(_userRepo.GetUser(id));
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
 
         [HttpPost]
         [AllowAnonymous]
