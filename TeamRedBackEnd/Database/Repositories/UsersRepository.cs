@@ -56,16 +56,22 @@ namespace TeamRedBackEnd.Database.Repositories
         {
             return context.Users.Where(u => u.Id == id).FirstOrDefault();
         }
-       
-
-        public User GetUser(string name)
+        public User GetUserByName(string name)
         {
-            if (name.Contains("@"))
-            {
-                return context.Users.Where(u => u.Email == name).FirstOrDefault();
-            }
             return context.Users.Where(u => u.Name == name).FirstOrDefault();
         }
+
+        public User GetUserByEmail(string email)
+        {
+            return context.Users.Where(u => u.Email == email).FirstOrDefault();
+        }
+
+        public User GetUserByEmailAndName(string email, string name)
+        {
+            return context.Users.Where(u => (u.Email == email) && (u.Name == name)).FirstOrDefault();
+
+        }
+
 
         public List<User> GetUsersWithIdArray(int[] idArray)
         {
@@ -92,7 +98,7 @@ namespace TeamRedBackEnd.Database.Repositories
 
         public void EditUser(Usermodel usermodel)
         {
-            
+
             var existingUser = GetUser(usermodel.Id);
             existingUser.Name = usermodel.Name;
             existingUser.Email = usermodel.Email;
@@ -105,7 +111,7 @@ namespace TeamRedBackEnd.Database.Repositories
             existingUser.BytePassword = usermodel.BytePassword;
             context.SaveChanges();
 
-           
+
 
         }
 

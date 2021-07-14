@@ -50,33 +50,34 @@ namespace TeamRedBackEnd.Controllers
             return Ok(user);
 
         }
-
-
-
         [HttpGet]
-        [Route("{userName}")]
-        [AllowAnonymous]
-        public IActionResult GetUserByNameOrEmail(string userName)
+        [Route("search")]
+        public IActionResult SearchUserByNameOrEmail()
         {
-            if (String.IsNullOrEmpty(userName))
-            {
-                return NotFound("Input can't be null");
-            }
-            var user = _userRepo.GetUser(userName);
+            string name = HttpContext.Request.Query["name"];
+            string email = HttpContext.Request.Query["email"];
+          
+            if (String.IsNullOrEmpty(name) && String.IsNullOrEmpty(email)) return NotFound("Input can't be null");
 
-            return user switch
-            {
-                null => NotFound("No user found with this name: " + userName),
-                _ => Ok(user),
-            };
+            User user = new User();
+
+            if (name != null && email != null) user = _userRepo.GetUserByEmailAndName(name, email);
+
+            if (name != null && email == null) user = _userRepo.GetUserByName(name);
+
+            if (name == null && email != null) user = _userRepo.GetUserByEmail(email);
+
+            return Ok(user);
+
         }
+
 
         [HttpGet]
         [Route("me")]
         public IActionResult GetUserWithJWT()
         {
             ClaimsPrincipal principal = HttpContext.User;
-            
+
             if (principal.Identity.Name == null) { return BadRequest(); }
 
             if (Int32.TryParse(principal.Identity.Name, out int id))
@@ -101,25 +102,23 @@ namespace TeamRedBackEnd.Controllers
         [AllowAnonymous]
         public IActionResult AddNewUser([FromBody] Usermodel usermodel)
         {
-
-            _passwordService.CreateSalt(usermodel);
-
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-
-            if (_userRepo.GetUser(usermodel.Name) != null)
+            if (_userRepo.GetUserByName(usermodel.Name) != null)
             {
                 ModelState.AddModelError("name", "User name already in use");
                 return BadRequest(ModelState);
             }
 
-            if (_userRepo.GetUser(usermodel.Email) != null)
+            if (_userRepo.GetUserByEmail(usermodel.Email) != null)
             {
                 ModelState.AddModelError("email", "Email address already in use");
                 return BadRequest(ModelState);
             }
 
             usermodel.VerificationCode = Nanoid.Nanoid.Generate();
+
+            _passwordService.CreateSalt(usermodel);
 
             _passwordService.HashPassword(usermodel);
 
@@ -150,9 +149,9 @@ namespace TeamRedBackEnd.Controllers
         public ActionResult<Usermodel> EditUserProfile(int userId, [FromBody] Usermodel usermodel)
         {
             var existingUserProfile = _userRepo.GetUser(userId);
-            var checkIfNameExists = _userRepo.GetUser(usermodel.Name);
-            var checkIfEmailExists = _userRepo.GetUser(usermodel.Email);
-            _passwordService.CreateSalt(usermodel);
+            var checkIfNameExists = _userRepo.GetUserByName(usermodel.Name);
+            var checkIfEmailExists = _userRepo.GetUserByEmail(usermodel.Email);
+
 
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -170,7 +169,7 @@ namespace TeamRedBackEnd.Controllers
             }
 
             usermodel.Id = existingUserProfile.Id;
-
+            _passwordService.CreateSalt(usermodel);
             _passwordService.HashPassword(usermodel);
             _userRepo.EditUser(usermodel);
 
@@ -205,7 +204,7 @@ namespace TeamRedBackEnd.Controllers
             {
                 return NotFound("Input can't be null");
             }
-            var userToDelete = _userRepo.GetUser(userName);
+            var userToDelete = _userRepo.GetUserByName(userName);
 
             if (userToDelete == null)
             {
