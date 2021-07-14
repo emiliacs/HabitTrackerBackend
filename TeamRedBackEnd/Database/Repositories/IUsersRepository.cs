@@ -10,7 +10,11 @@ namespace TeamRedBackEnd.Database.Repositories
     public interface IUsersRepository
     {
         public User GetUser(int id);
-        public User GetUser(string name);
+
+        public User GetUserByEmail(string email);
+        public User GetUserByName(string name);
+
+        public User GetUserByEmailAndName(string email, string name);
         public User GetUserByVerificationCode(string verificationCode);
 
         public List<User> GetUsersWithIdArray(int[] idArray);

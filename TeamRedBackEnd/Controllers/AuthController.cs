@@ -32,7 +32,7 @@ namespace TeamRedBackEnd.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            Database.Models.User user = UserRepository.GetUser(model.Email);
+            Database.Models.User user = UserRepository.GetUserByEmail(model.Email);
             bool passwordValid = PasswordService.VerifyHash(model.Password, user);
 
             if (!passwordValid || user == null)
@@ -47,7 +47,7 @@ namespace TeamRedBackEnd.Controllers
         public ActionResult<AuthData> LogoutPost([FromBody] LoginViewModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            Database.Models.User user = UserRepository.GetUser(model.Email);
+            Database.Models.User user = UserRepository.GetUserByEmail(model.Email);
             return AuthService.GetAuthData(user.Id.ToString(), 10);
         }
 
