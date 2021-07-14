@@ -133,14 +133,22 @@ namespace TeamRedBackEnd.Controllers
 
 
         [HttpPatch]
-        [Route("{VerificationLinkCode}")]
-        public IActionResult VerifyUser([FromBody] string VerificationCode)
+        [Route("verify")]
+        [AllowAnonymous]
+        public IActionResult VerifyUserEmail()
         {
-            User user = _userRepo.GetUserByVerificationCode(VerificationCode);
-            if (user == null) return BadRequest("Invalid verification link");
+            string verificationCode = HttpContext.Request.Query["verificationcode"];
+
+            if (String.IsNullOrEmpty(verificationCode)) return NotFound("Input can't be null");
+
+            User user = _userRepo.GetUserByVerificationCode(verificationCode);
+
+            if (user == null) return NotFound();
+
             user.Verified = true;
             _userRepo.EditUser(user);
-            return Ok(user);
+
+            return Ok("Verification success");
         }
 
 
