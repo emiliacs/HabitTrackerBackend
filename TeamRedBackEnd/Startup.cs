@@ -38,6 +38,8 @@ namespace TeamRedBackEnd
                                   {
                                       builder.WithOrigins("http://localhost:19006");
                                       builder.AllowAnyHeader();
+                                      builder.AllowAnyMethod();
+                                      builder.AllowCredentials();
                                   });
             });
             services.AddDbContext<Database.DatabaseContext>(options => options.UseNpgsql(Configuration.GetSection("DatabaseLogin").GetSection("EasyLog").Value));
@@ -83,10 +85,10 @@ namespace TeamRedBackEnd
             
             app.UseRouting();
 
+            app.UseCors(MyAllowSpecificOrigins);
+
             app.UseAuthentication();
             app.UseAuthorization();
-            
-            app.UseCors(MyAllowSpecificOrigins);
 
             app.UseEndpoints(endpoints =>
             {
