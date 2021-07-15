@@ -15,62 +15,54 @@ namespace TeamRedBackEnd.Controllers
 
     public class UsersController : ControllerBase
     {
-        private IUsersRepository _userRepo;
         Services.PasswordService _passwordService;
         Services.IMailService _mailService;
+        private IRepositoryWrapper _repoWrapper;
 
 
-
-        public UsersController(IUsersRepository userRepo, Services.PasswordService passwordService, Services.IMailService mailService)
+        public UsersController(IRepositoryWrapper wrapper, Services.PasswordService passwordService, Services.IMailService mailService)
         {
-            _userRepo = userRepo;
             _passwordService = passwordService;
             _mailService = mailService;
-
+            _repoWrapper = wrapper;
         }
-
 
         [HttpGet]
         public IActionResult GetAllUsers()
         {
-            return Ok(_userRepo.GetAllUsers());
+            return Ok(_repoWrapper.UsersRepository.GetAllUsers());
         }
-
 
         [HttpGet]
         [Route("{userId:int}")]
-
         public IActionResult GetUserById(int userId)
         {
-
-            var user = _userRepo.GetUser(userId);
+            var user = _repoWrapper.UsersRepository.GetUserById(userId);
 
             if (user == null) return NotFound("User with ID: " + userId + " doesn't exist");
 
             return Ok(user);
-
         }
+
         [HttpGet]
         [Route("search")]
         public IActionResult SearchUserByNameOrEmail()
         {
             string name = HttpContext.Request.Query["name"];
             string email = HttpContext.Request.Query["email"];
-          
+
             if (String.IsNullOrEmpty(name) && String.IsNullOrEmpty(email)) return NotFound("Input can't be null");
 
             User user = new User();
 
-            if (name != null && email != null) user = _userRepo.GetUserByEmailAndName(name, email);
+            if (name != null && email != null) user = _repoWrapper.UsersRepository.GetUserByEmailAndName(name, email);
 
-            if (name != null && email == null) user = _userRepo.GetUserByName(name);
+            if (name != null && email == null) user = _repoWrapper.UsersRepository.GetUserByName(name);
 
-            if (name == null && email != null) user = _userRepo.GetUserByEmail(email);
+            if (name == null && email != null) user = _repoWrapper.UsersRepository.GetUserByEmail(email);
 
             return Ok(user);
-
         }
-
 
         [HttpGet]
         [Route("me")]
@@ -82,10 +74,10 @@ namespace TeamRedBackEnd.Controllers
 
             if (Int32.TryParse(principal.Identity.Name, out int id))
             {
-                var user = _userRepo.GetUser(id);
+                var user = _repoWrapper.UsersRepository.GetUserById(id);
                 if (user != null)
                 {
-                    return Ok(_userRepo.GetUser(id));
+                    return Ok(_repoWrapper.UsersRepository.GetUserById(id));
                 }
                 else
                 {
@@ -104,33 +96,28 @@ namespace TeamRedBackEnd.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            if (_userRepo.GetUserByName(usermodel.Name) != null)
+            if (_repoWrapper.UsersRepository.GetUserByName(usermodel.Name) != null)
             {
                 ModelState.AddModelError("name", "User name already in use");
                 return BadRequest(ModelState);
             }
 
-            if (_userRepo.GetUserByEmail(usermodel.Email) != null)
+            if (_repoWrapper.UsersRepository.GetUserByEmail(usermodel.Email) != null)
             {
                 ModelState.AddModelError("email", "Email address already in use");
                 return BadRequest(ModelState);
             }
 
             usermodel.VerificationCode = Nanoid.Nanoid.Generate();
-
             _passwordService.CreateSalt(usermodel);
-
             _passwordService.HashPassword(usermodel);
-
-            _userRepo.AddUser(usermodel);
-
+            _repoWrapper.UsersRepository.AddUser(usermodel);
             MailRequest mail = _mailService.MakeVerificationMail(usermodel);
             _mailService.SendMailAsync(mail);
-
+            _repoWrapper.Save();
 
             return Ok("User " + usermodel.Name + " has been created\n");
         }
-
 
         [HttpPatch]
         [Route("verify")]
@@ -141,35 +128,32 @@ namespace TeamRedBackEnd.Controllers
 
             if (String.IsNullOrEmpty(verificationCode)) return NotFound("Input can't be null");
 
-            User user = _userRepo.GetUserByVerificationCode(verificationCode);
+            User user = _repoWrapper.UsersRepository.GetUserByVerificationCode(verificationCode);
 
             if (user == null) return NotFound();
 
             user.Verified = true;
-            _userRepo.EditUser(user);
+            _repoWrapper.UsersRepository.EditUser(user);
 
             return Ok("Verification success");
         }
-
 
         [HttpPatch]
         [Route("{userId:int}")]
         public ActionResult<Usermodel> EditUserProfile(int userId, [FromBody] Usermodel usermodel)
         {
-            var existingUserProfile = _userRepo.GetUser(userId);
-            var checkIfNameExists = _userRepo.GetUserByName(usermodel.Name);
-            var checkIfEmailExists = _userRepo.GetUserByEmail(usermodel.Email);
-
+            var existingUserProfile = _repoWrapper.UsersRepository.GetUserById(userId);
 
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
+            var checkIfNameExists = _repoWrapper.UsersRepository.GetUserByName(usermodel.Name);
+            var checkIfEmailExists = _repoWrapper.UsersRepository.GetUserByEmail(usermodel.Email);
 
             if (checkIfNameExists != null && checkIfNameExists.Id != existingUserProfile.Id)
             {
                 ModelState.AddModelError("name", "User name already in use");
                 return BadRequest(ModelState);
             }
-
             else if (checkIfEmailExists != null && checkIfEmailExists.Id != existingUserProfile.Id)
             {
                 ModelState.AddModelError("email", "This email address is already in use");
@@ -179,46 +163,29 @@ namespace TeamRedBackEnd.Controllers
             usermodel.Id = existingUserProfile.Id;
             _passwordService.CreateSalt(usermodel);
             _passwordService.HashPassword(usermodel);
-            _userRepo.EditUser(usermodel);
+            _repoWrapper.UsersRepository.EditUser(usermodel);
+            _repoWrapper.Save();
 
             return Ok(usermodel);
         }
 
-
         [HttpDelete]
-        [Route("{userId:int}")]
-        public IActionResult DeleteUser(int userId)
+        [Route("{id:int}")]
+        public IActionResult DeleteUser(int id)
         {
-            var userToDelete = _userRepo.GetUser(userId);
-            ObjectResult objectresult = NotFound("User with ID: " + userId + " doesn't exist");
-
-            if (userToDelete != null)
-            {
-                objectresult = Ok("User has been deleted");
-                _userRepo.RemoveUser(userToDelete);
-
-            }
-
-            return objectresult;
-
+            if (!_repoWrapper.UsersRepository.Exists(u => u.Id == id)) return NotFound("No user with id: " + id);
+            _repoWrapper.UsersRepository.RemoveUser(id);
+            _repoWrapper.Save();
+            return Ok("User has been deleted");
         }
-
 
         [HttpDelete]
         [Route("{userName}")]
         public IActionResult DeleteUser(string userName)
         {
-            if (String.IsNullOrWhiteSpace(userName))
-            {
-                return NotFound("Input can't be null");
-            }
-            var userToDelete = _userRepo.GetUserByName(userName);
-
-            if (userToDelete == null)
-            {
-                return NotFound("No user found with this name: " + userName);
-            }
-
+            if (!_repoWrapper.UsersRepository.Exists(u => u.Name == userName)) return NotFound("No user with this username " + userName);
+            _repoWrapper.UsersRepository.RemoveUserByName(userName);
+            _repoWrapper.Save();
             return Ok("User has been deleted");
 
         }

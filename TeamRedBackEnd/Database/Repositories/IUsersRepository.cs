@@ -7,28 +7,32 @@ using TeamRedBackEnd.ViewModels;
 
 namespace TeamRedBackEnd.Database.Repositories
 {
-    public interface IUsersRepository
+    public interface IUsersRepository : IRepositoryBase<User>
     {
-        public User GetUser(int id);
+        void AddUser(User user);
 
-        public User GetUserByEmail(string email);
-        public User GetUserByName(string name);
+        void AddUser(Usermodel userModel);
 
-        public User GetUserByEmailAndName(string email, string name);
-        public User GetUserByVerificationCode(string verificationCode);
+        Task<List<User>> GetAllUsersAsync();
 
-        public List<User> GetUsersWithIdArray(int[] idArray);
+        List<User> GetAllUsers();
 
-        public List<User> GetAllUsers();
+        User GetUserById(int id);
 
-        public void AddUser(string name, string email, string password);
+        User GetUserByName(string name);
 
-        public void RemoveUser(int id);
-        public void RemoveUser(User user);
+        User GetUserByEmail(string email);
 
-        public void EditUser(Usermodel usermodel);
-        public void EditUser(User newUser);
- 
-         void AddUser(Usermodel usermodel);
+        User GetUserByEmailAndName(string email, string name);
+
+        void RemoveUser(int id);
+
+        void RemoveUserByName(string username);
+
+        void EditUser(Usermodel usermodel);
+
+        void EditUser(User user);
+
+        User GetUserByVerificationCode(string verificationCode);
     }
 }
