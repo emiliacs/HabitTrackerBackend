@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace TeamRedBackEnd.Database.Models
 {
-    public class User
+    public class User : IModelBase
     {
         public int Id { get; set; }
         public string Name { get; set; }
