@@ -35,7 +35,7 @@ namespace TeamRedBackEnd.Services
             smtp.Disconnect(true);
         }
 
-        public MailRequest MakeVerificationMail(Usermodel user)
+        public MailRequest MakeVerificationMail(Database.Models.User user)
         {
             return  new MailRequest
             {

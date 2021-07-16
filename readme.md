@@ -43,6 +43,7 @@ update-database
 | GET | /api/users/search?name=value&email=value | get user with name and/or email |
 | PATCH | api/users/verify?verificationcode=value| Verify user email |
 | PATCH | api/users/{userId:int}  | Edit user profile |
+| PATCH | api/users/{userId:int}/changePassword  | Change user password |
 | DELETE | api/users/{userId:int} | Delete user with id |
 | POST | api/login | Login user|
 | POST | api/logout | Logout user |

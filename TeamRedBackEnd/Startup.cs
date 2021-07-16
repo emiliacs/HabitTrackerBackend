@@ -72,6 +72,8 @@ namespace TeamRedBackEnd
             services.Configure<ViewModels.MailSettings>(Configuration.GetSection("MailSettings"));
             services.AddScoped<Services.IMailService, Services.MailService>();
 
+            services.AddAutoMapper(typeof(Startup));
+
             services.AddControllers();
         }
 

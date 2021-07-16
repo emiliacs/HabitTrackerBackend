@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TeamRedBackEnd.ViewModels
+namespace TeamRedBackEnd.DataTransferObject
 {
-    public class LoginViewModel
+    public class LoginData
     {
         [Required]
         [EmailAddress]

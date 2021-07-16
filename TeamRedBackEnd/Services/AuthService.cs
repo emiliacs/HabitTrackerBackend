@@ -16,7 +16,7 @@ namespace TeamRedBackEnd.Services
             this.JwtSecret = JwtSecret;
             this.JwtLifespan = JwtLifespan;
         }
-        public ViewModels.AuthData GetAuthData(string id)
+        public DataTransferObject.AuthData GetAuthData(string id)
         {
             DateTime ExpirationTime = DateTime.Now.AddSeconds(JwtLifespan);
 
@@ -34,7 +34,7 @@ namespace TeamRedBackEnd.Services
             };
             JwtSecurityTokenHandler TokenHandler = new JwtSecurityTokenHandler();
             string Token = TokenHandler.WriteToken(TokenHandler.CreateToken(TokenDescriptor));
-            return new ViewModels.AuthData
+            return new DataTransferObject.AuthData
             {
                 Token = Token,
                 TokenExpirationTime = ((DateTimeOffset)ExpirationTime).ToUnixTimeSeconds(),
@@ -42,7 +42,7 @@ namespace TeamRedBackEnd.Services
             };
         }
 
-        public ViewModels.AuthData GetAuthData(string id, int lifespan )
+        public DataTransferObject.AuthData GetAuthData(string id, int lifespan )
         {
             DateTime ExpirationTime = DateTime.Now.AddSeconds(lifespan);
 
@@ -60,7 +60,7 @@ namespace TeamRedBackEnd.Services
             };
             JwtSecurityTokenHandler TokenHandler = new JwtSecurityTokenHandler();
             string Token = TokenHandler.WriteToken(TokenHandler.CreateToken(TokenDescriptor));
-            return new ViewModels.AuthData
+            return new DataTransferObject.AuthData
             {
                 Token = Token,
                 TokenExpirationTime = ((DateTimeOffset)ExpirationTime).ToUnixTimeSeconds(),

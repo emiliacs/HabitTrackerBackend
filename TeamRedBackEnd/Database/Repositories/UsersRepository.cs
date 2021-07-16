@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TeamRedBackEnd.Database.Models;
-using TeamRedBackEnd.ViewModels;
 
 namespace TeamRedBackEnd.Database.Repositories
 {
@@ -13,24 +12,6 @@ namespace TeamRedBackEnd.Database.Repositories
 
         public void AddUser(User user)
         {
-            Create(user);
-        }
-
-        public void AddUser(Usermodel userModel)
-        {
-            User user = new User()
-            {
-                Name = userModel.Name,
-                Email = userModel.Email,
-                Password = userModel.Password,
-                Picture = userModel.Picture,
-                PublicProfile = userModel.PublicProfile,
-                FriendIds = userModel.FriendIds,
-                GroupIds = userModel.GroupIds,
-                Salt = userModel.Salt,
-                BytePassword = userModel.BytePassword,
-                VerificationCode = userModel.VerificationCode
-            };
             Create(user);
         }
 
@@ -75,28 +56,10 @@ namespace TeamRedBackEnd.Database.Repositories
             Delete(user);
         }
 
-
-        public void EditUser(Usermodel usermodel)
-        {
-            var existingUser = GetUserById(usermodel.Id);
-            existingUser.Name = usermodel.Name;
-            existingUser.Email = usermodel.Email;
-            existingUser.Password = usermodel.Password;
-            existingUser.Picture = usermodel.Picture;
-            existingUser.PublicProfile = usermodel.PublicProfile;
-            existingUser.FriendIds = usermodel.FriendIds;
-            existingUser.GroupIds = usermodel.GroupIds;
-            existingUser.Salt = usermodel.Salt;
-            existingUser.BytePassword = usermodel.BytePassword;
-            existingUser.VerificationCode = usermodel.VerificationCode;
-            Update(existingUser);
-        }
-
         public void EditUser(User updateUser)
         {
             User user = new User
             {
-                Id = updateUser.Id,
                 Name = updateUser.Name,
                 Email = updateUser.Email,
                 Password = updateUser.Password,

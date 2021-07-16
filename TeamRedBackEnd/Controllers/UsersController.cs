@@ -2,10 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Security.Claims;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TeamRedBackEnd.Database.Models;
 using TeamRedBackEnd.Database.Repositories;
 using TeamRedBackEnd.ViewModels;
+using TeamRedBackEnd.DataTransferObject;
+using AutoMapper;
 
 namespace TeamRedBackEnd.Controllers
 {
@@ -15,22 +18,25 @@ namespace TeamRedBackEnd.Controllers
 
     public class UsersController : ControllerBase
     {
-        Services.PasswordService _passwordService;
-        Services.IMailService _mailService;
-        private IRepositoryWrapper _repoWrapper;
+        readonly Services.PasswordService _passwordService;
+        readonly Services.IMailService _mailService;
+        private readonly IRepositoryWrapper _repoWrapper;
+        private readonly IMapper _mapper;
 
 
-        public UsersController(IRepositoryWrapper wrapper, Services.PasswordService passwordService, Services.IMailService mailService)
+        public UsersController(IRepositoryWrapper wrapper, Services.PasswordService passwordService, Services.IMailService mailService, IMapper mapper)
         {
             _passwordService = passwordService;
             _mailService = mailService;
             _repoWrapper = wrapper;
+            _mapper = mapper;
         }
 
         [HttpGet]
         public IActionResult GetAllUsers()
         {
-            return Ok(_repoWrapper.UsersRepository.GetAllUsers());
+            var users = _repoWrapper.UsersRepository.GetAllUsers();
+            return Ok(_mapper.Map<List<UserDto>>(users));
         }
 
         [HttpGet]
@@ -38,10 +44,13 @@ namespace TeamRedBackEnd.Controllers
         public IActionResult GetUserById(int userId)
         {
             var user = _repoWrapper.UsersRepository.GetUserById(userId);
-
+            
             if (user == null) return NotFound("User with ID: " + userId + " doesn't exist");
 
-            return Ok(user);
+            var userdto = _mapper.Map<UserDto>(user);
+
+            return Ok(userdto);
+
         }
 
         [HttpGet]
@@ -61,7 +70,9 @@ namespace TeamRedBackEnd.Controllers
 
             if (name == null && email != null) user = _repoWrapper.UsersRepository.GetUserByEmail(email);
 
-            return Ok(user);
+            var userDto = _mapper.Map<OtherUserDto>(user);
+
+            return Ok(userDto);
         }
 
         [HttpGet]
@@ -77,7 +88,8 @@ namespace TeamRedBackEnd.Controllers
                 var user = _repoWrapper.UsersRepository.GetUserById(id);
                 if (user != null)
                 {
-                    return Ok(_repoWrapper.UsersRepository.GetUserById(id));
+                    var userDto = _mapper.Map<UserDto>(_repoWrapper.UsersRepository.GetUserById(id));
+                    return Ok(userDto);
                 }
                 else
                 {
@@ -92,7 +104,7 @@ namespace TeamRedBackEnd.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public IActionResult AddNewUser([FromBody] Usermodel usermodel)
+        public IActionResult AddNewUser([FromBody] CreateUserDto usermodel)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -108,11 +120,13 @@ namespace TeamRedBackEnd.Controllers
                 return BadRequest(ModelState);
             }
 
-            usermodel.VerificationCode = Nanoid.Nanoid.Generate();
-            _passwordService.CreateSalt(usermodel);
-            _passwordService.HashPassword(usermodel);
-            _repoWrapper.UsersRepository.AddUser(usermodel);
-            MailRequest mail = _mailService.MakeVerificationMail(usermodel);
+            var user = _mapper.Map<User>(usermodel);
+
+            user.VerificationCode = Nanoid.Nanoid.Generate();
+            _passwordService.CreateSalt(user);
+            _passwordService.HashPassword(user);
+            _repoWrapper.UsersRepository.AddUser(user);
+            MailRequest mail = _mailService.MakeVerificationMail(user);
             _mailService.SendMailAsync(mail);
             _repoWrapper.Save();
 
@@ -140,33 +154,59 @@ namespace TeamRedBackEnd.Controllers
 
         [HttpPatch]
         [Route("{userId:int}")]
-        public ActionResult<Usermodel> EditUserProfile(int userId, [FromBody] Usermodel usermodel)
+        public ActionResult<UserDto> EditUserProfile(int userId, [FromBody] EditUserDto editUserDto)
         {
             var existingUserProfile = _repoWrapper.UsersRepository.GetUserById(userId);
 
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var checkIfNameExists = _repoWrapper.UsersRepository.GetUserByName(usermodel.Name);
-            var checkIfEmailExists = _repoWrapper.UsersRepository.GetUserByEmail(usermodel.Email);
+            var checkIfNameExists = _repoWrapper.UsersRepository.GetUserByName(editUserDto.Name);
+            var checkIfEmailExists = _repoWrapper.UsersRepository.GetUserByEmail(editUserDto.Email);
 
             if (checkIfNameExists != null && checkIfNameExists.Id != existingUserProfile.Id)
             {
                 ModelState.AddModelError("name", "User name already in use");
-                return BadRequest(ModelState);
+                return Conflict(ModelState);
             }
             else if (checkIfEmailExists != null && checkIfEmailExists.Id != existingUserProfile.Id)
             {
                 ModelState.AddModelError("email", "This email address is already in use");
-                return BadRequest(ModelState);
+                return Conflict(ModelState);
             }
 
-            usermodel.Id = existingUserProfile.Id;
-            _passwordService.CreateSalt(usermodel);
-            _passwordService.HashPassword(usermodel);
-            _repoWrapper.UsersRepository.EditUser(usermodel);
+            _mapper.Map( editUserDto, existingUserProfile);
+            
+            _repoWrapper.UsersRepository.EditUser(existingUserProfile);
             _repoWrapper.Save();
 
-            return Ok(usermodel);
+            var userdto = _mapper.Map<UserDto>(existingUserProfile);
+
+            return Ok(userdto);
+        }
+
+        [HttpPatch]
+        [Route("{id:int}/changePassword")]
+        public IActionResult ChangeUserPassword(int id, [FromBody]EditPasswordDto edit) 
+        {   
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var existingUserProfile = _repoWrapper.UsersRepository.GetUserById(id);
+
+            if (existingUserProfile == null) return NotFound("User not found");
+
+            if (!_passwordService.VerifyHash(edit.CurrentPassword, existingUserProfile)) return Conflict("Password incorrect");
+
+            if (edit.NewPassword != edit.ConfrimPassword) return Conflict("Passwords don't match");
+
+            existingUserProfile.Password = edit.NewPassword;
+
+            _passwordService.CreateSalt(existingUserProfile);
+            _passwordService.HashPassword(existingUserProfile);
+
+            _repoWrapper.UsersRepository.Update(existingUserProfile);
+            _repoWrapper.Save();
+
+            return Ok();
         }
 
         [HttpDelete]
