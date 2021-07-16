@@ -1,9 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using TeamRedBackEnd.ViewModels;
+using TeamRedBackEnd.DataObjects;
 using MimeKit;
 using MailKit.Security;
 using MailKit.Net.Smtp;

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace TeamRedBackEnd.ViewModels
+﻿
+namespace TeamRedBackEnd.DataObjects
 {
     public class MailRequest
     {

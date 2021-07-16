@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿
 using System.Threading.Tasks;
 
 namespace TeamRedBackEnd.Database.Repositories
 {
     public class RepositoryWrapper : IRepositoryWrapper
     {
-        private DatabaseContext _databaseContext;
+        private readonly DatabaseContext _databaseContext;
         
         private IUsersRepository _userRepository;
         private IHabitRepository _habitRepository;

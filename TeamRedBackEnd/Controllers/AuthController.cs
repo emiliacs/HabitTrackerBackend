@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using TeamRedBackEnd.DataTransferObject;
 using TeamRedBackEnd.Services;
+using TeamRedBackEnd.Database.Repositories;
+using TeamRedBackEnd.Database.Models;
 
 namespace TeamRedBackEnd.Controllers
 {
@@ -13,26 +11,27 @@ namespace TeamRedBackEnd.Controllers
 
     public class AuthController : ControllerBase
     {
-        IAuthService AuthService;
-        IMailService MailService;
-        PasswordService PasswordService;
+        private readonly IAuthService AuthService;
+        private readonly PasswordService PasswordService;
 
-        Database.Repositories.IUsersRepository UserRepository;
+        readonly IUsersRepository UserRepository;
 
-        public AuthController(IAuthService AuthService, Database.Repositories.IUsersRepository UserRepository, IMailService MailService, PasswordService PasswordService)
+        public AuthController(IAuthService AuthService, IUsersRepository UserRepository, PasswordService PasswordService)
         {
             this.AuthService = AuthService;
-            this.MailService = MailService;
             this.PasswordService = PasswordService;
             this.UserRepository = UserRepository;
         }
 
         [HttpPost("login")]
-        public ActionResult<AuthData> Post([FromBody] LoginData model)
+        public ActionResult Post([FromBody] LoginData model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            Database.Models.User user = UserRepository.GetUserByEmail(model.Email);
+            User user = UserRepository.GetUserByEmail(model.Email);
+
+            if (user == null) NotFound(new { msg = "No account with this email" });
+             
             bool passwordValid = PasswordService.VerifyHash(model.Password, user);
 
             if (!passwordValid || user == null)
@@ -44,11 +43,12 @@ namespace TeamRedBackEnd.Controllers
         }
 
         [HttpPost("logout")]
-        public ActionResult<AuthData> LogoutPost([FromBody] LoginData model)
+        public ActionResult LogoutPost([FromBody] LoginData model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            Database.Models.User user = UserRepository.GetUserByEmail(model.Email);
-            return AuthService.GetAuthData(user.Id.ToString(), 10);
+            User user = UserRepository.GetUserByEmail(model.Email);
+            if(user == null) return NotFound();
+            return Ok(AuthService.GetAuthData(user.Id.ToString(), 10));
         }
 
 

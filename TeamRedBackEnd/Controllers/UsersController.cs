@@ -3,12 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Security.Claims;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using AutoMapper;
 using TeamRedBackEnd.Database.Models;
 using TeamRedBackEnd.Database.Repositories;
-using TeamRedBackEnd.ViewModels;
 using TeamRedBackEnd.DataTransferObject;
-using AutoMapper;
+
 
 namespace TeamRedBackEnd.Controllers
 {
@@ -50,7 +49,6 @@ namespace TeamRedBackEnd.Controllers
             var userdto = _mapper.Map<UserDto>(user);
 
             return Ok(userdto);
-
         }
 
         [HttpGet]
@@ -81,7 +79,7 @@ namespace TeamRedBackEnd.Controllers
         {
             ClaimsPrincipal principal = HttpContext.User;
 
-            if (principal.Identity.Name == null) { return BadRequest(); }
+            if (principal.Identity.Name == null) return BadRequest(); 
 
             if (Int32.TryParse(principal.Identity.Name, out int id))
             {
@@ -111,13 +109,13 @@ namespace TeamRedBackEnd.Controllers
             if (_repoWrapper.UsersRepository.GetUserByName(usermodel.Name) != null)
             {
                 ModelState.AddModelError("name", "User name already in use");
-                return BadRequest(ModelState);
+                return Conflict(ModelState);
             }
 
             if (_repoWrapper.UsersRepository.GetUserByEmail(usermodel.Email) != null)
             {
                 ModelState.AddModelError("email", "Email address already in use");
-                return BadRequest(ModelState);
+                return Conflict(ModelState);
             }
 
             var user = _mapper.Map<User>(usermodel);
@@ -126,7 +124,7 @@ namespace TeamRedBackEnd.Controllers
             _passwordService.CreateSalt(user);
             _passwordService.HashPassword(user);
             _repoWrapper.UsersRepository.AddUser(user);
-            MailRequest mail = _mailService.MakeVerificationMail(user);
+            DataObjects.MailRequest mail = _mailService.MakeVerificationMail(user);
             _mailService.SendMailAsync(mail);
             _repoWrapper.Save();
 
@@ -156,9 +154,9 @@ namespace TeamRedBackEnd.Controllers
         [Route("{userId:int}")]
         public ActionResult<UserDto> EditUserProfile(int userId, [FromBody] EditUserDto editUserDto)
         {
-            var existingUserProfile = _repoWrapper.UsersRepository.GetUserById(userId);
-
             if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var existingUserProfile = _repoWrapper.UsersRepository.GetUserById(userId);
 
             var checkIfNameExists = _repoWrapper.UsersRepository.GetUserByName(editUserDto.Name);
             var checkIfEmailExists = _repoWrapper.UsersRepository.GetUserByEmail(editUserDto.Email);
@@ -217,17 +215,6 @@ namespace TeamRedBackEnd.Controllers
             _repoWrapper.UsersRepository.RemoveUser(id);
             _repoWrapper.Save();
             return Ok("User has been deleted");
-        }
-
-        [HttpDelete]
-        [Route("{userName}")]
-        public IActionResult DeleteUser(string userName)
-        {
-            if (!_repoWrapper.UsersRepository.Exists(u => u.Name == userName)) return NotFound("No user with this username " + userName);
-            _repoWrapper.UsersRepository.RemoveUserByName(userName);
-            _repoWrapper.Save();
-            return Ok("User has been deleted");
-
         }
 
     }
