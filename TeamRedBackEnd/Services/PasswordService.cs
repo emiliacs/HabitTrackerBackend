@@ -12,29 +12,29 @@ namespace TeamRedBackEnd.Services
     public class PasswordService
     {
 
-        public byte[] CreateSalt(ViewModels.Usermodel usermodel)
+        public byte[] CreateSalt(User user)
         {
             var buffer = new byte[16];
             var rng = new RNGCryptoServiceProvider();
             rng.GetBytes(buffer);
 
-            return usermodel.Salt = buffer;
+            return user.Salt = buffer;
         }
 
-        public byte[] HashPassword(ViewModels.Usermodel usermodel)
+        public byte[] HashPassword(User user)
         {
-            var argon2 = new Argon2id(Encoding.UTF8.GetBytes(usermodel.Password));
+            var argon2 = new Argon2id(Encoding.UTF8.GetBytes(user.Password));
 
-            argon2.Salt = usermodel.Salt;
+            argon2.Salt = user.Salt;
             argon2.DegreeOfParallelism = 8;
             argon2.Iterations = 4;
             argon2.MemorySize = 1024 * 1024;
-            usermodel.BytePassword = argon2.GetBytes(16);
+            user.BytePassword = argon2.GetBytes(16);
 
-            string hashToString = Convert.ToBase64String(usermodel.BytePassword);
-            usermodel.Password = hashToString;
+            string hashToString = Convert.ToBase64String(user.BytePassword);
+            user.Password = hashToString;
 
-            return usermodel.BytePassword;
+            return user.BytePassword;
         }
 
 

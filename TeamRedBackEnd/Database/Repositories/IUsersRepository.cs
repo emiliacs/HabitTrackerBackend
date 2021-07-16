@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TeamRedBackEnd.Database.Models;
-using TeamRedBackEnd.ViewModels;
 
 namespace TeamRedBackEnd.Database.Repositories
 {
@@ -11,7 +10,6 @@ namespace TeamRedBackEnd.Database.Repositories
     {
         void AddUser(User user);
 
-        void AddUser(Usermodel userModel);
 
         Task<List<User>> GetAllUsersAsync();
 
@@ -28,8 +26,6 @@ namespace TeamRedBackEnd.Database.Repositories
         void RemoveUser(int id);
 
         void RemoveUserByName(string username);
-
-        void EditUser(Usermodel usermodel);
 
         void EditUser(User user);
 

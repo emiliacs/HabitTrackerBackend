@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using TeamRedBackEnd.ViewModels;
+using TeamRedBackEnd.DataTransferObject;
 using TeamRedBackEnd.Services;
 
 namespace TeamRedBackEnd.Controllers
@@ -28,7 +28,7 @@ namespace TeamRedBackEnd.Controllers
         }
 
         [HttpPost("login")]
-        public ActionResult<AuthData> Post([FromBody] LoginViewModel model)
+        public ActionResult<AuthData> Post([FromBody] LoginData model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -37,14 +37,14 @@ namespace TeamRedBackEnd.Controllers
 
             if (!passwordValid || user == null)
             {
-                return BadRequest(new { msg = "Incorrect email or password" });
+                return Conflict(new { msg = "Incorrect email or password" });
             }
             return Ok(AuthService.GetAuthData(user.Id.ToString()));
             
         }
 
         [HttpPost("logout")]
-        public ActionResult<AuthData> LogoutPost([FromBody] LoginViewModel model)
+        public ActionResult<AuthData> LogoutPost([FromBody] LoginData model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             Database.Models.User user = UserRepository.GetUserByEmail(model.Email);
