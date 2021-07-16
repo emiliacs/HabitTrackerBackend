@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -8,11 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace TeamRedBackEnd
 {
@@ -60,16 +54,17 @@ namespace TeamRedBackEnd
                         
                     };
                 });
+
             services.AddScoped<Database.Repositories.IRepositoryWrapper, Database.Repositories.RepositoryWrapper>();
-            services.AddScoped<Database.Repositories.IUsersRepository, Database.Repositories.UsersRepository>();
-            services.AddScoped<Services.PasswordService>();
 
             services.AddSingleton<Services.IAuthService>(new Services.AuthService(
                Configuration.GetSection("JWTSettings").GetValue<string>("SecurityKey"),
                Configuration.GetSection("JWTSettings").GetValue<int>("AverageLifespan")
                ));
 
-            services.Configure<ViewModels.MailSettings>(Configuration.GetSection("MailSettings"));
+            services.AddScoped<Services.PasswordService>();
+            
+            services.Configure<DataObjects.MailSettings>(Configuration.GetSection("MailSettings"));
             services.AddScoped<Services.IMailService, Services.MailService>();
 
             services.AddAutoMapper(typeof(Startup));

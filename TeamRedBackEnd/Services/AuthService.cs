@@ -1,7 +1,7 @@
 ﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 
 
@@ -9,8 +9,8 @@ namespace TeamRedBackEnd.Services
 {
     public class AuthService : IAuthService
     {
-        string JwtSecret;
-        int JwtLifespan;
+        readonly string JwtSecret;
+        readonly int JwtLifespan;
         public AuthService(string JwtSecret, int JwtLifespan)
         {
             this.JwtSecret = JwtSecret;
@@ -66,11 +66,6 @@ namespace TeamRedBackEnd.Services
                 TokenExpirationTime = ((DateTimeOffset)ExpirationTime).ToUnixTimeSeconds(),
                 Id = id
             };
-        }
-
-        public bool VerifyPassword(string actualPassword, string hashedPassword)
-        {
-            return actualPassword == hashedPassword;
         }
 
     }

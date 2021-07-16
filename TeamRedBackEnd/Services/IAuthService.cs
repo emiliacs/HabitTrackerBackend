@@ -5,6 +5,5 @@ namespace TeamRedBackEnd.Services
     {
         public AuthData GetAuthData(string id);
         public AuthData GetAuthData(string id, int lifespan);
-        public bool VerifyPassword(string actualPassword, string hashedPassword);
     }
 }
