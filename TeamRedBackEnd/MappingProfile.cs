@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using TeamRedBackEnd.Database.Models;
 using TeamRedBackEnd.DataTransferObject;
+using TeamRedBackEnd.DataTransferObjects;
 
 namespace TeamRedBackEnd
 {
@@ -18,7 +19,7 @@ namespace TeamRedBackEnd
 
             CreateMap<Habit, HabitDto>();
             CreateMap<HabitDto, Habit>();
-
+            CreateMap<EditHabitDto, Habit>();
 
         }
     }

@@ -7,7 +7,7 @@ namespace TeamRedBackEnd.Database.Repositories
 {
     public class HabitRepository : RepositoryBase<Habit>, IHabitRepository
     {
-        public HabitRepository(DatabaseContext context) : base(context){}
+        public HabitRepository(DatabaseContext context) : base(context) { }
 
         public List<Habit> GetAllHabits()
         {
@@ -73,6 +73,7 @@ namespace TeamRedBackEnd.Database.Repositories
             Delete(habit);
         }
 
-        
+
+
     }
 }
