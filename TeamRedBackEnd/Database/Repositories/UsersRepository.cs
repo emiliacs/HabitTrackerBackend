@@ -30,17 +30,17 @@ namespace TeamRedBackEnd.Database.Repositories
         }
         public User GetUserByName(string name)
         {
-            return GetSingle(u => u.Name == name);
+            return GetSingle(u => u.UpperName == name.ToUpper());
         }
 
         public User GetUserByEmail(string email)
         {
-            return GetSingle(u => u.Email == email);
+            return GetSingle(u => u.UpperEmail == email.ToUpper());
         }
 
         public User GetUserByEmailAndName(string email, string name)
         {
-            return GetSingle(u => (u.Email == email) && (u.Name == name));
+            return GetSingle(u => (u.UpperEmail == email.ToUpper()) && (u.UpperName == name.ToUpper()));
         }
 
         public void RemoveUser(int id)
@@ -51,7 +51,7 @@ namespace TeamRedBackEnd.Database.Repositories
 
         public void RemoveUserByName(string username)
         {
-            User user = GetSingle(u => u.Name == username);
+            User user = GetSingle(u => u.UpperName == username.ToUpper());
             Delete(user);
         }
 
