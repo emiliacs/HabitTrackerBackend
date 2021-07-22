@@ -119,14 +119,17 @@ namespace TeamRedBackEnd.Controllers
             }
 
             var user = _mapper.Map<User>(usermodel);
-
-            user.VerificationCode = Nanoid.Nanoid.Generate();
+            
             _passwordService.CreateSalt(user);
             _passwordService.HashPassword(user);
-            _repoWrapper.UsersRepository.AddUser(user);
+
+            user.VerificationCode = Nanoid.Nanoid.Generate();
             DataObjects.MailRequest mail = _mailService.MakeVerificationMail(user);
             _mailService.SendMailAsync(mail);
-            _repoWrapper.Save();
+
+            _repoWrapper.UsersRepository.AddUser(user);
+
+            if (!_repoWrapper.TryToSave()) return Conflict("User name or email address is already in use");
 
             return Ok("User " + usermodel.Name + " has been created\n");
         }

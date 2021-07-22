@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace TeamRedBackEnd.Database.Models
 {
+    [Index(nameof(Name),nameof(Email),IsUnique = true)]
     public class User : IModelBase
     {
         public int Id { get; set; }

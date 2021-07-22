@@ -30,7 +30,8 @@ namespace TeamRedBackEnd.Database
                 entity.Property(e => e.FriendIds).HasColumnName("user_friends");
                 entity.Property(e => e.GroupIds).HasColumnName("user_groups");
 
-
+                entity.HasIndex(e => e.Name).IsUnique(true);
+                entity.HasIndex(e => e.Email).IsUnique(true);
             });
 
             modelBuilder.Entity<Group>(entity =>

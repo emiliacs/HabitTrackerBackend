@@ -9,6 +9,7 @@ namespace TeamRedBackEnd.Database.Repositories
         IHabitRepository HabitRepository { get; }
         
         void Save();
+        bool TryToSave();
         Task SaveAsync();
     }
 }
