@@ -47,7 +47,7 @@ namespace TeamRedBackEnd.Controllers
 
         [HttpGet]
         [Route("search")]
-        public async Task <IActionResult> GetAllHabitsByHabitName()
+        public async Task<IActionResult> GetAllHabitsByHabitName()
         {
             string habitname = HttpContext.Request.Query["habitname"];
             if (String.IsNullOrEmpty(habitname)) return NotFound("Input shall not be empty");
@@ -70,7 +70,7 @@ namespace TeamRedBackEnd.Controllers
 
         [HttpGet]
         [Route("user/name")]
-        public async Task<IActionResult> GetAllHPublicHabitsOfOwner() 
+        public async Task<IActionResult> GetAllHPublicHabitsOfOwner()
         {
             string userName = HttpContext.Request.Query["userName"];
             if (String.IsNullOrEmpty(userName)) return NotFound("Input shall not be empty");
@@ -85,10 +85,12 @@ namespace TeamRedBackEnd.Controllers
         public IActionResult AddNewHabit([FromBody] HabitDto habitModel)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
+            var doesUserExist = _repoWrapper.UsersRepository.Exists(u => habitModel.OwnerId == u.Id);
+            if (!doesUserExist)  return NotFound("No user found with this Id");
             Habit habit = _mapper.Map<Habit>(habitModel);
             _repoWrapper.HabitRepository.AddHabit(habit);
             _repoWrapper.Save();
-            return Created(new Uri(Request.GetEncodedUrl() + "/" + habit.Id), habit);
+            return Created(new Uri(Request.GetEncodedUrl() + "/" + habit.Id), habitModel);
         }
 
         [HttpDelete]
@@ -122,8 +124,5 @@ namespace TeamRedBackEnd.Controllers
             var habitDto = _mapper.Map<HabitDto>(existingHabit);
             return Ok(habitDto);
         }
-
-
-
     }
 }

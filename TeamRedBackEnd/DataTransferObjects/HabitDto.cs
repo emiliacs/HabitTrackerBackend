@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace TeamRedBackEnd.DataTransferObject
 {
@@ -14,5 +15,8 @@ namespace TeamRedBackEnd.DataTransferObject
         public string Reward { get; set; }
         public bool Favorite { get; set; }
         public bool PublicHabit { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public int TimesTodo { get; set; }
     }
 }

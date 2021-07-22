@@ -43,7 +43,7 @@ namespace TeamRedBackEnd.Controllers
         public IActionResult GetUserById(int userId)
         {
             var user = _repoWrapper.UsersRepository.GetUserById(userId);
-            
+
             if (user == null) return NotFound("User with ID: " + userId + " doesn't exist");
 
             var userdto = _mapper.Map<UserDto>(user);
@@ -79,7 +79,7 @@ namespace TeamRedBackEnd.Controllers
         {
             ClaimsPrincipal principal = HttpContext.User;
 
-            if (principal.Identity.Name == null) return BadRequest(); 
+            if (principal.Identity.Name == null) return BadRequest();
 
             if (Int32.TryParse(principal.Identity.Name, out int id))
             {
@@ -119,7 +119,7 @@ namespace TeamRedBackEnd.Controllers
             }
 
             var user = _mapper.Map<User>(usermodel);
-            
+
             _passwordService.CreateSalt(user);
             _passwordService.HashPassword(user);
 
@@ -175,9 +175,9 @@ namespace TeamRedBackEnd.Controllers
                 return Conflict(ModelState);
             }
 
-            _mapper.Map( editUserDto, existingUserProfile);
-            
-            _repoWrapper.UsersRepository.EditUser(existingUserProfile);
+            _mapper.Map(editUserDto, existingUserProfile);
+
+            _repoWrapper.UsersRepository.Update(existingUserProfile);
             _repoWrapper.Save();
 
             var userdto = _mapper.Map<UserDto>(existingUserProfile);
@@ -187,8 +187,8 @@ namespace TeamRedBackEnd.Controllers
 
         [HttpPatch]
         [Route("{id:int}/changePassword")]
-        public IActionResult ChangeUserPassword(int id, [FromBody]EditPasswordDto edit) 
-        {   
+        public IActionResult ChangeUserPassword(int id, [FromBody] EditPasswordDto edit)
+        {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var existingUserProfile = _repoWrapper.UsersRepository.GetUserById(id);
