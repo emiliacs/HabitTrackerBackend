@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
 namespace TeamRedBackEnd.Database.Repositories
@@ -41,7 +42,28 @@ namespace TeamRedBackEnd.Database.Repositories
         }
         public void Save()
         {
-            _databaseContext.SaveChanges();
+            try
+            {
+                _databaseContext.SaveChanges();
+            }
+            catch (DbUpdateException)
+            {
+                _databaseContext.Dispose();
+            }
+        }
+
+        public bool TryToSave()
+        {
+            try
+            {
+                _databaseContext.SaveChanges();
+            }
+            catch (DbUpdateException)
+            {
+                _databaseContext.Dispose();
+                return false;
+            }
+            return true;
         }
 
         public async Task SaveAsync()
