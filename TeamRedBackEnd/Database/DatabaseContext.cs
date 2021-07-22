@@ -21,7 +21,9 @@ namespace TeamRedBackEnd.Database
                 entity.ToTable("userProfile");
                 entity.Property(e => e.Id).HasColumnName("user_id").IsRequired().ValueGeneratedOnAdd();
                 entity.Property(e => e.Name).HasColumnName("user_name");
+                entity.Property(e => e.UpperName).HasColumnName("user_name_upper");
                 entity.Property(e => e.Email).HasColumnName("user_email");
+                entity.Property(e => e.UpperEmail).HasColumnName("user_email_upper");
                 entity.Property(e => e.Password).HasColumnName("user_password");
                 entity.Property(e => e.Picture).HasColumnName("user_picture");
                 entity.Property(e => e.PublicProfile).HasColumnName("user_public_profile");
@@ -30,8 +32,8 @@ namespace TeamRedBackEnd.Database
                 entity.Property(e => e.FriendIds).HasColumnName("user_friends");
                 entity.Property(e => e.GroupIds).HasColumnName("user_groups");
 
-                entity.HasIndex(e => e.Name).IsUnique(true);
-                entity.HasIndex(e => e.Email).IsUnique(true);
+                entity.HasIndex(e => e.UpperName).IsUnique(true);
+                entity.HasIndex(e => e.UpperEmail).IsUnique(true);
             });
 
             modelBuilder.Entity<Group>(entity =>

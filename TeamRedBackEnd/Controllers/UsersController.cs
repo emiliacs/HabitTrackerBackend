@@ -119,6 +119,8 @@ namespace TeamRedBackEnd.Controllers
             }
 
             var user = _mapper.Map<User>(usermodel);
+            user.UpperEmail = user.Email.ToUpper();
+            user.UpperName = user.Name.ToUpper();
 
             _passwordService.CreateSalt(user);
             _passwordService.HashPassword(user);
@@ -148,7 +150,7 @@ namespace TeamRedBackEnd.Controllers
             if (user == null) return NotFound();
 
             user.Verified = true;
-            _repoWrapper.UsersRepository.EditUser(user);
+            _repoWrapper.UsersRepository.Update(user);
 
             return Ok("Verification success");
         }

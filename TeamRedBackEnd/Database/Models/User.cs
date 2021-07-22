@@ -3,12 +3,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TeamRedBackEnd.Database.Models
 {
-    [Index(nameof(Name),nameof(Email),IsUnique = true)]
+    [Index(nameof(UpperName),nameof(UpperEmail),IsUnique = true)]
     public class User : IModelBase
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public string UpperName { get; set; }
         public string Email { get; set; }
+        public string UpperEmail { get; set; }
         public string Password { get; set; }
         public string Picture { get; set; }
         public bool PublicProfile { get; set; }

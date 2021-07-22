@@ -14,13 +14,13 @@ namespace TeamRedBackEnd.Controllers
         private readonly IAuthService AuthService;
         private readonly PasswordService PasswordService;
 
-        readonly IUsersRepository UserRepository;
+        readonly IRepositoryWrapper _wrapper;
 
-        public AuthController(IAuthService AuthService, IUsersRepository UserRepository, PasswordService PasswordService)
+        public AuthController(IAuthService AuthService, IRepositoryWrapper wrapper, PasswordService PasswordService)
         {
             this.AuthService = AuthService;
             this.PasswordService = PasswordService;
-            this.UserRepository = UserRepository;
+            _wrapper = wrapper;
         }
 
         [HttpPost("login")]
@@ -28,7 +28,7 @@ namespace TeamRedBackEnd.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            User user = UserRepository.GetUserByEmail(model.Email);
+            User user = _wrapper.UsersRepository.GetUserByEmail(model.Email);
 
             if (user == null) NotFound(new { msg = "No account with this email" });
              
@@ -46,7 +46,7 @@ namespace TeamRedBackEnd.Controllers
         public ActionResult LogoutPost([FromBody] LoginData model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            User user = UserRepository.GetUserByEmail(model.Email);
+            User user = _wrapper.UsersRepository.GetUserByEmail(model.Email);
             if(user == null) return NotFound();
             return Ok(AuthService.GetAuthData(user.Id.ToString(), 10));
         }
