@@ -12,11 +12,13 @@ namespace TeamRedBackEnd
 {
     public class Startup
     {
-        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+        readonly string MyCorsPolicies = "_myCorsPolicies";
+        private readonly IWebHostEnvironment _env;
 
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            _env = env;
         }
 
         public IConfiguration Configuration { get; }
@@ -27,14 +29,19 @@ namespace TeamRedBackEnd
 
             services.AddCors(options =>
             {
-                options.AddPolicy(name: MyAllowSpecificOrigins,
-                                  builder =>
-                                  {
-                                      builder.WithOrigins("http://localhost:19006");
-                                      builder.AllowAnyHeader();
-                                      builder.AllowAnyMethod();
-                                      builder.AllowCredentials();
-                                  });
+                options.AddPolicy(name: MyCorsPolicies, builder =>
+                {
+                    if (_env.IsDevelopment())
+                    {
+                        builder.SetIsOriginAllowed(_ => true)
+                            .AllowAnyHeader()
+                            .AllowCredentials()
+                            .AllowAnyMethod();
+
+                    }
+                    else builder.WithOrigins("http://localhost:19006");
+
+                });
             });
             services.AddDbContext<Database.DatabaseContext>(options => options.UseNpgsql(Configuration.GetSection("DatabaseLogin").GetSection("EasyLog").Value));
 
@@ -82,7 +89,7 @@ namespace TeamRedBackEnd
             
             app.UseRouting();
 
-            app.UseCors(MyAllowSpecificOrigins);
+            app.UseCors(MyCorsPolicies);
 
             app.UseAuthentication();
             app.UseAuthorization();
