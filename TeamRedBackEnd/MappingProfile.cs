@@ -21,6 +21,8 @@ namespace TeamRedBackEnd
             CreateMap<HabitDto, Habit>();
             CreateMap<EditHabitDto, Habit>();
 
+            CreateMap<HabitHistoryDto, History>();
+
         }
     }
 }

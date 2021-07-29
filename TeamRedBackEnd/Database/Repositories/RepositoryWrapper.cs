@@ -10,6 +10,7 @@ namespace TeamRedBackEnd.Database.Repositories
         
         private IUsersRepository _userRepository;
         private IHabitRepository _habitRepository;
+        private IHabitHistoryRepository _habitHistoryRepository;
 
         public RepositoryWrapper(DatabaseContext databaseContext)
         {
@@ -38,6 +39,17 @@ namespace TeamRedBackEnd.Database.Repositories
                     _habitRepository = new HabitRepository(_databaseContext);
                 }
                 return _habitRepository;
+            }
+        }
+        public IHabitHistoryRepository HabitHistoryRepository
+        {
+            get
+            {
+                if (_habitHistoryRepository == null)
+                {
+                    _habitHistoryRepository = new HabitHistoryRepository(_databaseContext);
+                }
+                return _habitHistoryRepository;
             }
         }
         public void Save()
