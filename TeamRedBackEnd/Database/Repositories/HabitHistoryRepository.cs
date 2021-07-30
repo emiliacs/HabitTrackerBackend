@@ -37,7 +37,7 @@ namespace TeamRedBackEnd.Database.Repositories
 
         public void AddHabitToHistory(History history)
         {
-            var habitResult = FindByCondition(h => h.Id == history.HabitId);
+            history.HabitHistoryDate = DateTime.Now;
             Create(history);
         }
 
