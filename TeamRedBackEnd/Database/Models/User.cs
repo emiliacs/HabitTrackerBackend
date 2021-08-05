@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TeamRedBackEnd.Database.Models
 {
-    [Index(nameof(UpperName),nameof(UpperEmail),IsUnique = true)]
     public class User : IModelBase
     {
         public int Id { get; set; }
@@ -25,5 +24,6 @@ namespace TeamRedBackEnd.Database.Models
 
         public ICollection<Group> Groups { get; set; }
         public ICollection<Habit> Habits { get; set; }
+        public ICollection<History> Histories { get; set; }
     }
 }

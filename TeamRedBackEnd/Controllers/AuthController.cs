@@ -30,7 +30,7 @@ namespace TeamRedBackEnd.Controllers
 
             User user = _wrapper.UsersRepository.GetUserByEmail(model.Email);
 
-            if (user == null) NotFound(new { msg = "No account with this email" });
+            if (user == null) return NotFound(new { msg = "No account with this email" });
              
             bool passwordValid = PasswordService.VerifyHash(model.Password, user);
 

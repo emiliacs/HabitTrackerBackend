@@ -12,8 +12,8 @@ namespace TeamRedBackEnd.Database.Models
         public bool HabitHistoryResult { get; set; }
         public int HabitHistoryNum { get; set; }
 
-        [ForeignKey("HabitId")]
         public Habit Habit { get; set; }
+        public User User { get; set; }
 
     }
 }
