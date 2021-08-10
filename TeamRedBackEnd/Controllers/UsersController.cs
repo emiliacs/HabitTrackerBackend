@@ -21,27 +21,36 @@ namespace TeamRedBackEnd.Controllers
         readonly Services.IMailService _mailService;
         private readonly IRepositoryWrapper _repoWrapper;
         private readonly IMapper _mapper;
+        private readonly Services.CheckUserDataService _checkService;
 
 
-        public UsersController(IRepositoryWrapper wrapper, Services.PasswordService passwordService, Services.IMailService mailService, IMapper mapper)
+        public UsersController(IRepositoryWrapper wrapper, Services.PasswordService passwordService, Services.IMailService mailService, IMapper mapper, Services.CheckUserDataService checkService)
         {
             _passwordService = passwordService;
             _mailService = mailService;
             _repoWrapper = wrapper;
             _mapper = mapper;
+            _checkService = checkService;
         }
 
         [HttpGet]
         public IActionResult GetAllUsers()
         {
             var users = _repoWrapper.UsersRepository.GetAllUsers();
-            return Ok(_mapper.Map<List<UserDto>>(users));
+            return Ok(_mapper.Map<List<OtherUserDto>>(users));
         }
 
         [HttpGet]
         [Route("{userId:int}")]
         public IActionResult GetUserById(int userId)
         {
+            if (_checkService.GetUserTokenId(HttpContext.User) != userId)
+            {
+                var otherUser = _repoWrapper.UsersRepository.GetUserById(userId);
+                if (otherUser == null) return NotFound("User with ID: " + userId + " doesn't exist");
+                var otherUserDto = _mapper.Map<OtherUserDto>(otherUser);
+                return Ok(otherUserDto);
+            }
             var user = _repoWrapper.UsersRepository.GetUserById(userId);
 
             if (user == null) return NotFound("User with ID: " + userId + " doesn't exist");
@@ -79,25 +88,15 @@ namespace TeamRedBackEnd.Controllers
         {
             ClaimsPrincipal principal = HttpContext.User;
 
-            if (principal.Identity.Name == null) return BadRequest();
+            int userId = _checkService.GetUserTokenId(principal);
 
-            if (Int32.TryParse(principal.Identity.Name, out int id))
-            {
-                var user = _repoWrapper.UsersRepository.GetUserById(id);
-                if (user != null)
-                {
-                    var userDto = _mapper.Map<UserDto>(_repoWrapper.UsersRepository.GetUserById(id));
-                    return Ok(userDto);
-                }
-                else
-                {
-                    return NotFound();
-                }
-            }
-            else
-            {
-                return NotFound();
-            }
+            if (userId == 0) return NotFound();
+            var user = _repoWrapper.UsersRepository.GetUserById(userId);
+
+            if (user == null) return NotFound();
+            
+            var userDto = _mapper.Map<UserDto>(user);
+            return Ok(userDto);
         }
 
         [HttpPost]
@@ -145,7 +144,9 @@ namespace TeamRedBackEnd.Controllers
 
             if (String.IsNullOrEmpty(verificationCode)) return NotFound("Input can't be null");
 
-            User user = _repoWrapper.UsersRepository.GetUserByVerificationCode(verificationCode);
+            int userId = _checkService.GetUserTokenId(HttpContext.User);
+
+            User user = _repoWrapper.UsersRepository.GetSingle(u => u.Id == userId && u.VerificationCode == verificationCode);
 
             if (user == null) return NotFound();
 
@@ -160,6 +161,8 @@ namespace TeamRedBackEnd.Controllers
         public ActionResult<UserDto> EditUserProfile(int userId, [FromBody] EditUserDto editUserDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            if (_checkService.GetUserTokenId(HttpContext.User) != userId) return Forbid();
 
             var existingUserProfile = _repoWrapper.UsersRepository.GetUserById(userId);
 
@@ -193,6 +196,8 @@ namespace TeamRedBackEnd.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
+            if (_checkService.GetUserTokenId(HttpContext.User) != id) return Forbid();
+
             var existingUserProfile = _repoWrapper.UsersRepository.GetUserById(id);
 
             if (existingUserProfile == null) return NotFound("User not found");
@@ -216,6 +221,8 @@ namespace TeamRedBackEnd.Controllers
         [Route("{id:int}")]
         public IActionResult DeleteUser(int id)
         {
+            if (_checkService.GetUserTokenId(HttpContext.User) != id) return Forbid();
+
             if (!_repoWrapper.UsersRepository.Exists(u => u.Id == id)) return NotFound("No user with id: " + id);
             _repoWrapper.UsersRepository.RemoveUser(id);
             _repoWrapper.Save();

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using TeamRedBackEnd.Database.Models;
 using TeamRedBackEnd.DataTransferObjects;
@@ -17,11 +18,13 @@ namespace TeamRedBackEnd.Controllers
     {
         private readonly Database.Repositories.IRepositoryWrapper _repoWrapper;
         private readonly IMapper _mapper;
+        private readonly Services.CheckUserDataService _checkService;
 
-        public HabitHistoryController(Database.Repositories.IRepositoryWrapper wrapper, IMapper mapper)
+        public HabitHistoryController(Database.Repositories.IRepositoryWrapper wrapper, IMapper mapper, Services.CheckUserDataService checkService)
         {
             _repoWrapper = wrapper;
             _mapper = mapper;
+            _checkService = checkService;
         }
 
         private ObjectResult CheckIfHistoryExists(List<History> habitHistory)
@@ -31,6 +34,7 @@ namespace TeamRedBackEnd.Controllers
             return Ok(historyDtos);
         }
 
+        
         [HttpGet]
         public async Task<IActionResult> GetHistory()
         {
@@ -42,7 +46,8 @@ namespace TeamRedBackEnd.Controllers
         [Route("habit/{habitId}")]
         public async Task<IActionResult> GetAllHistoryOfHabit(int habitId)
         {
-            var habitHistory = await _repoWrapper.HabitHistoryRepository.FindByConditionAsync(h => h.HabitId == habitId);
+            int requestUserId = _checkService.GetUserTokenId(HttpContext.User);
+            var habitHistory = await _repoWrapper.HabitHistoryRepository.FindByConditionAsync(h => h.HabitId == habitId && h.OwnerId == requestUserId);
             return CheckIfHistoryExists(habitHistory);
         }
 
@@ -50,6 +55,7 @@ namespace TeamRedBackEnd.Controllers
         [Route("user/{userId:int}/sevendayhistory")]
         public IActionResult GetSevenDayHistory(int userId)
         {
+            if (_checkService.GetUserTokenId(HttpContext.User) != userId) return Forbid();
             var habitHistory = _repoWrapper.HabitHistoryRepository.GetSevenDayHistory(userId);
             return CheckIfHistoryExists(habitHistory);
         }
@@ -58,6 +64,7 @@ namespace TeamRedBackEnd.Controllers
         [Route("user/{userId:int}/search")]
         public IActionResult GetAllHistoryOfUser(int userId)
         {
+            if (_checkService.GetUserTokenId(HttpContext.User) != userId) return Forbid();
             var habitHistory = _repoWrapper.HabitHistoryRepository.GetHistoryByUserId(userId);
             return CheckIfHistoryExists(habitHistory);
         }
@@ -66,6 +73,7 @@ namespace TeamRedBackEnd.Controllers
         [Route("search/{userId:int}")]
         public IActionResult GetHistoryFromTimeSpan(int userId)
         {
+            if (_checkService.GetUserTokenId(HttpContext.User) != userId) return Forbid();
             string startDate = HttpContext.Request.Query["startdate"];
             string endDate = HttpContext.Request.Query["enddate"];
             if (String.IsNullOrEmpty(startDate) && String.IsNullOrEmpty(endDate)) return NotFound("Input can not be empty");
@@ -78,13 +86,17 @@ namespace TeamRedBackEnd.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var habit = _repoWrapper.HabitRepository.GetHabit(habitHistoryDto.HabitId);
+            int requestUserId = _checkService.GetUserTokenId(HttpContext.User);
+
+            if (requestUserId == 0) return NotFound("User Not Found");
+
+            var habit = _repoWrapper.HabitRepository.GetSingle(h=> h.HabitId == habitHistoryDto.HabitId && h.OwnerId == requestUserId );
 
             if (habit == null) return NotFound("Invalid habitId");
 
             History history = _mapper.Map<History>(habitHistoryDto);
 
-            history.OwnerId = habit.OwnerId;
+            history.OwnerId = requestUserId;
 
             if (habit.EndDate < DateTime.Now) history.HabitHistoryResult = true;
 
@@ -101,7 +113,7 @@ namespace TeamRedBackEnd.Controllers
 
             var existingHistory = _repoWrapper.HabitHistoryRepository.GetOneHistoryById(historyId);
 
-            if (existingHistory == null) return NotFound("No history found with this id");
+            if (existingHistory == null || _checkService.GetUserTokenId(HttpContext.User) != existingHistory.OwnerId) return NotFound("No history found with this id");
 
             var habit = _repoWrapper.HabitRepository.GetHabit(editHistorytDto.HabitId);
 
@@ -122,7 +134,8 @@ namespace TeamRedBackEnd.Controllers
         [Route("{historyId:int}")]
         public IActionResult DeleteOneHabitHistory(int historyId)
         {
-            if (!_repoWrapper.HabitHistoryRepository.Exists(h => h.Id == historyId)) return NotFound("No history found with this id");
+            int requestUser = _checkService.GetUserTokenId(HttpContext.User);
+            if (!_repoWrapper.HabitHistoryRepository.Exists(h => h.Id == historyId && h.OwnerId == requestUser)) return NotFound("No history found with this id");
             _repoWrapper.HabitHistoryRepository.RemoveHistory(historyId);
             _repoWrapper.Save();
             return Ok();
@@ -132,6 +145,7 @@ namespace TeamRedBackEnd.Controllers
         [Route("user/{ownerId:int}")]
         public IActionResult DeleteAllHistoryOfOwner(int ownerId)
         {
+            if (ownerId != _checkService.GetUserTokenId(HttpContext.User)) return Forbid();
             var ownersHistory = _repoWrapper.HabitHistoryRepository.FindByCondition(h => h.OwnerId == ownerId);
             if (ownersHistory == null) return NotFound("No history found");
             foreach (var history in ownersHistory) _repoWrapper.HabitHistoryRepository.Delete(history);

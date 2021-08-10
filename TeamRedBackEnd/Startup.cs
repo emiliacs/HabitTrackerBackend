@@ -73,6 +73,7 @@ namespace TeamRedBackEnd
             
             services.Configure<DataObjects.MailSettings>(Configuration.GetSection("MailSettings"));
             services.AddScoped<Services.IMailService, Services.MailService>();
+            services.AddScoped<Services.CheckUserDataService>();
 
             services.AddAutoMapper(typeof(Startup));
 
