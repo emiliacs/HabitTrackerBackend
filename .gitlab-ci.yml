@@ -1,0 +1,25 @@
+image: mcr.microsoft.com/dotnet/core/sdk:3.1
+
+stages:
+    - build
+    - test
+
+variables:
+    test: "TeamRedBackEnd.Tests"
+    solution: TeamRedBackEnd.sln
+
+before_script:
+    - "dotnet restore TeamRedBackEnd.sln"
+
+build:
+    stage: build
+    script:
+        - dotnet restore TeamRedBackEnd.sln
+        - dotnet build TeamRedBackEnd.sln
+
+
+test:
+    stage: test
+    script:
+        - "cd $test"
+        - "dotnet test"
