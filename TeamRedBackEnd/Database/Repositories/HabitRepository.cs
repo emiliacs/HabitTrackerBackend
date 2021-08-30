@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TeamRedBackEnd.Database.Models;
@@ -7,7 +8,8 @@ namespace TeamRedBackEnd.Database.Repositories
 {
     public class HabitRepository : RepositoryBase<Habit>, IHabitRepository
     {
-        public HabitRepository(DatabaseContext context) : base(context) { }
+        private DatabaseContext _databaseContext;
+        public HabitRepository(DatabaseContext context) : base(context) { _databaseContext = context; }
 
         public List<Habit> GetAllHabits()
         {
@@ -17,6 +19,13 @@ namespace TeamRedBackEnd.Database.Repositories
         public List<Habit> GetHabitByUserId(int UserId)
         {
             return FindByCondition(h => h.OwnerId == UserId).ToList();
+        }
+
+        public List<Habit> GetById(int userId)
+        {
+            return _databaseContext.Habits.Where(habit => habit.OwnerId == userId)
+                .Include(habit => habit.History.OrderBy(history => history.HabitHistoryDate)
+                .Take(7)).ToList();
         }
 
         public async Task<List<Habit>> GetAllHabitsAsync()

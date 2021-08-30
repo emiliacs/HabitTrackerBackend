@@ -6,7 +6,6 @@ namespace TeamRedBackEnd.Database.Repositories
 {
     public interface IHabitHistoryRepository : IRepositoryBase<History>
     {
-
         List<History> GetAllHistory();
         List<History> GetHistoryByUserId(int id);
         List<History> GetHistoryFromTimeSpan(int id, string startDate, string endDate);
@@ -15,6 +14,7 @@ namespace TeamRedBackEnd.Database.Repositories
         void AddHabitToHistory(History history);
         void RemoveHistory(int id);
         void EditHistory(History history);
+        public List<History> GetHistoryByHabitId(int id);
 
     }
 }

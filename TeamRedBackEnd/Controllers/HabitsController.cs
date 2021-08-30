@@ -29,13 +29,13 @@ namespace TeamRedBackEnd.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllHabits()
+        public IActionResult GetAllHabits()
         {
-            var user = _repoWrapper.UsersRepository.GetUserById(_checkService.GetUserTokenId(HttpContext.User));
-            var habits = await _repoWrapper.HabitRepository.FindByConditionAsync(h => h.OwnerId == user.Id);
+            var userId = _checkService.GetUserTokenId(HttpContext.User);
+            var habits = _repoWrapper.HabitRepository.GetById(userId);
             if (habits.Count == 0) return NotFound("No Habits Found");
             var habitsDto = _mapper.Map<List<HabitDto>>(habits);
-            return Ok(habitsDto); 
+            return Ok(habitsDto);
         }
 
         [HttpGet]
@@ -44,6 +44,7 @@ namespace TeamRedBackEnd.Controllers
         {
             if (!_repoWrapper.HabitRepository.Exists(h => h.Id == habitId)) return NotFound("No habit with this id found");
             var habit = _repoWrapper.HabitRepository.GetHabit(habitId);
+
             if (_checkService.GetUserTokenId(HttpContext.User) == habit.OwnerId) return Ok(_mapper.Map<HabitDto>(habit));
             if (habit.PublicHabit == false) return Forbid();
             var habitDto = _mapper.Map<HabitDto>(habit);
@@ -66,15 +67,15 @@ namespace TeamRedBackEnd.Controllers
         [Route("user/{userId:int}")]
         public async Task<IActionResult> GetAllPrivateHabitsOfOwner(int userId)
         {
-            var isOwnerIdValid = _repoWrapper.UsersRepository.Exists(u=> u.Id==userId);
+            var isOwnerIdValid = _repoWrapper.UsersRepository.Exists(u => u.Id == userId);
             if (!isOwnerIdValid) return NotFound("No habits found");
-            
+
             int requestUserId = _checkService.GetUserTokenId(HttpContext.User);
             if (requestUserId != userId) return Forbid();
 
             var habits = await _repoWrapper.HabitRepository.FindByConditionAsync(h => h.OwnerId == userId && h.PublicHabit == false);
-                        
-            if(habits == null) return NotFound("No habits found");
+
+            if (habits == null) return NotFound("No habits found");
 
             var habitDtos = _mapper.Map<List<HabitDto>>(habits);
             return Ok(habitDtos);
@@ -101,7 +102,7 @@ namespace TeamRedBackEnd.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (habitModel.OwnerId != _checkService.GetUserTokenId(HttpContext.User)) return Forbid();
             var doesUserExist = _repoWrapper.UsersRepository.Exists(u => habitModel.OwnerId == u.Id);
-            if (!doesUserExist)  return NotFound("No user found with this Id");
+            if (!doesUserExist) return NotFound("No user found with this Id");
             Habit habit = _mapper.Map<Habit>(habitModel);
             _repoWrapper.HabitRepository.AddHabit(habit);
             _repoWrapper.Save();
@@ -128,7 +129,7 @@ namespace TeamRedBackEnd.Controllers
             var existingHabit = _repoWrapper.HabitRepository.GetHabit(habitId);
             int requestUserId = _checkService.GetUserTokenId(HttpContext.User);
             if (existingHabit == null || requestUserId != existingHabit.OwnerId) return NotFound("No habit with this id");
-            
+
 
             if (_repoWrapper.UsersRepository.GetUserById(editHabitDto.OwnerId) == null)
             {
