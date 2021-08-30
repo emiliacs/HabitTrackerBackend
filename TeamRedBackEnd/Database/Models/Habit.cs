@@ -23,8 +23,7 @@ namespace TeamRedBackEnd.Database.Models
 
         public enum Weekdays { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday }
         public Weekdays ChosenWeekDays { get; set; }
-        public List<History> History;
-
+        public List<History> History { get; set; }
         public User User { get; set; }
         public Group Group { get; set; }
 

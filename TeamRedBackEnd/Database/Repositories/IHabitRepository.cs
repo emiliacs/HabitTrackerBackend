@@ -11,7 +11,6 @@ namespace TeamRedBackEnd.Database.Repositories
         List<Habit> GetHabitByUserId(int UserId);
         Task<List<Habit>> GetAllHabitsAsync();
         Task<List<Habit>> GetHabitByUserIdAsync(int UserId);
-
         Habit GetHabit(int id);
 
         void AddHabit(Habit habit);
@@ -19,5 +18,7 @@ namespace TeamRedBackEnd.Database.Repositories
 
         void RemoveHabit(int id);
         void RemoveHabit(Habit habit);
+
+         List<Habit> GetById(int userId);
     }
 }

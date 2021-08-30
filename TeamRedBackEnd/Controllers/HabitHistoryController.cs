@@ -34,7 +34,7 @@ namespace TeamRedBackEnd.Controllers
             return Ok(historyDtos);
         }
 
-        
+
         [HttpGet]
         public async Task<IActionResult> GetHistory()
         {
@@ -90,7 +90,7 @@ namespace TeamRedBackEnd.Controllers
 
             if (requestUserId == 0) return NotFound("User Not Found");
 
-            var habit = _repoWrapper.HabitRepository.GetSingle(h=> h.HabitId == habitHistoryDto.HabitId && h.OwnerId == requestUserId );
+            var habit = _repoWrapper.HabitRepository.GetSingle(h => h.Id == habitHistoryDto.HabitId && h.OwnerId == requestUserId);
 
             if (habit == null) return NotFound("Invalid habitId");
 
@@ -102,7 +102,8 @@ namespace TeamRedBackEnd.Controllers
 
             _repoWrapper.HabitHistoryRepository.AddHabitToHistory(history);
             _repoWrapper.Save();
-            return Created(new Uri(Request.GetEncodedUrl() + "/" + history.Id), history);
+            var historyDto = _mapper.Map<HabitHistoryDto>(history);
+            return Created(new Uri(Request.GetEncodedUrl() + "/" + historyDto.Id), historyDto);
         }
 
         [HttpPatch]
@@ -152,5 +153,6 @@ namespace TeamRedBackEnd.Controllers
             _repoWrapper.Save();
             return Ok();
         }
+
     }
 }

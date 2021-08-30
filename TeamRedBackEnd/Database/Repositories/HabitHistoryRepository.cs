@@ -7,7 +7,8 @@ namespace TeamRedBackEnd.Database.Repositories
 {
     public class HabitHistoryRepository : RepositoryBase<History>, IHabitHistoryRepository
     {
-        public HabitHistoryRepository(DatabaseContext context) : base(context) { }
+        private DatabaseContext _databaseContext;
+        public HabitHistoryRepository(DatabaseContext context) : base(context) { _databaseContext = context; }
 
         public List<History> GetAllHistory()
         {
@@ -16,6 +17,11 @@ namespace TeamRedBackEnd.Database.Repositories
         public List<History> GetHistoryByUserId(int id)
         {
             return FindByCondition(h => h.OwnerId == id).ToList();
+        }
+
+        public List<History> GetHistoryByHabitId(int id)
+        {
+            return _databaseContext.Histories.Where(history => history.HabitId == id).ToList();
         }
         public List<History> GetHistoryFromTimeSpan(int id, string startDate, string endDate)
         {

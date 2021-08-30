@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using TeamRedBackEnd.Database.Models;
+using TeamRedBackEnd.DataTransferObjects;
 
 namespace TeamRedBackEnd.DataTransferObject
 {
@@ -18,5 +21,6 @@ namespace TeamRedBackEnd.DataTransferObject
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int TimesTodo { get; set; }
+        public List<HabitHistoryDto> history { get; set; }
     }
 }
